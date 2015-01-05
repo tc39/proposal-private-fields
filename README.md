@@ -67,7 +67,8 @@ class Point {
 ```
 
 Because private fields are lexically scoped, declarations nested within the class body
-can access private state.
+can access private state.  (This example uses the proposed
+[function bind operator](https://github.com/zenparsing/es-function-bind).)
 
 ```js
 class Container {
