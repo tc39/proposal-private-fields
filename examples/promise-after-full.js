@@ -175,7 +175,7 @@ class Promise {
 
     static accept(x) {
 
-        return this::_accepted(e);
+        return this::_accepted(x);
     }
 
     static reject(e) {
