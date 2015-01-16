@@ -145,7 +145,7 @@ For more complete examples, see:
 - Immediately before initializing the **this** value associated with a Function Environment Record,
   if the environment's [[FunctionObject]] has a [[PrivateFields]] list, then loop through each
   private field in the list, calling [[Map]].set with the incoming **this** value and the
-  result of evaluating the [[Initializer]] node.
+  result of evaluating the [[Initializer]] node, or **undefined** if [[Initializer]] is empty.
 
 #### Private References ####
 
