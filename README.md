@@ -6,7 +6,7 @@ necessary for supporting *high-integrity classes*.
 ### A Brief Introduction ###
 
 Private fields are represented as an identifer prefixed with the `@` character.  Private
-fields are lexcically confined to their containing class and are not reified.  In the
+fields are lexically confined to their containing class and are not reified.  In the
 following example, `@x` and `@y` are private fields whose type is guaranteed to be
 **Number**.
 
@@ -78,7 +78,6 @@ class Container {
     // Other fields...
 
     clear() {
-
         if (this::_isEmpty())
             return;
 
@@ -88,26 +87,18 @@ class Container {
     // Other methods...
 
     function _isEmpty() {
-
         return @count === 0;
     }
 }
 ```
 
-Private fields may have an initializer.  The initializer is evaluated during private
-field initialization, which occurs when the constructor is called, and before default
-constructor arguments are evaluated.
+As shown in the previous example, private fields may have an initializer.  Private field
+initializers are evaluated when the constructor's **this** value is initialized.
 
 For more complete examples, see:
 
 - [A port of V8's promise implementation](examples/promise-after.js)
 - [A text decoding helper for Node](examples/text-decoder.js)
-
-### Motivation ###
-
-### Design Goals ###
-
-### Features ###
 
 ### Syntax ###
 
@@ -138,10 +129,38 @@ For more complete examples, see:
         AtName
 
 
-### Static Semantics ###
+### Semantics ###
 
-TODO
+#### Initialization Model ####
 
-### Runtime Semantics ###
+- Each class constructor that contains private fields has an internal slot named [[PrivateFields]] whose
+  value is a non-empty List of **PrivateFieldRecord** objects.
+- A **PrivateFieldRecord** object has the following internal slots:
+  - [[Map]]: A **PrivateMap** object.
+  - [[Initializer]]: The root node of the parse tree of the private field's initializer expression.
+- A **PrivateMap** is a specification type with the following methods:
+  - has(obj)
+  - get(obj)
+  - set(obj, value)
+- Immediately before initializing the **this** value associated with a Function Environment Record,
+  if the environment's [[FunctionObject]] has a [[PrivateFields]] list, then loop through each
+  private field in the list, calling [[Map]].set with the incoming **this** value and the
+  result of evaluating the [[Initializer]] node.
 
-TODO
+#### Private References ####
+
+- When an at-name is used as a primary expression such as `@field`, it is equivalent to the
+  member expression `this.@field`.
+- At-name member expressions return a private reference, whose property name component is a **PrivateMap**
+  object.
+- When GetValue is called on a private reference _V_:
+    - Let _privateMap_ be GetReferencedName(_V_)
+    - If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
+    - Otherwise, return _privateMap_.get(_baseValue_)
+    - NOTE: The prototype chain is not traversed
+- When SetValue is called on a private reference _V_ with value _W_:
+    - Let _privateMap_ be GetReferencedName(_V_)
+    - If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
+    - Otherwise, return _privateMap_.set(_baseValue_, _W_)
+    - NOTE: The prototype chain is not traversed
+
