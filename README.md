@@ -129,23 +129,34 @@ For more complete examples, see:
         AtName
 
 
-### Semantics ###
+### High-Level Semantics ###
 
-#### Initialization Model ####
+#### Private Declarations ####
 
-- Each class constructor that contains private fields has an internal slot named [[PrivateFields]] whose
-  value is a non-empty List of **PrivateFieldRecord** objects.
-- A **PrivateFieldRecord** object has the following internal slots:
-  - [[Map]]: A **PrivateMap** object.
-  - [[Initializer]]: The root node of the parse tree of the private field's initializer expression.
+- A _PrivateDeclaration_ creates a new **PrivateMap** object bound to the lexical environment
+  of the containing _ClassBody_.
 - A **PrivateMap** is a specification type with the following methods:
   - has(obj)
   - get(obj)
   - set(obj, value)
-- Immediately before initializing the **this** value associated with a Function Environment Record,
-  if the environment's [[FunctionObject]] has a [[PrivateFields]] list, then loop through each
-  private field in the list, calling [[Map]].set with the incoming **this** value and the
-  result of evaluating the [[Initializer]] node, or **undefined** if [[Initializer]] is empty.
+- The semantics of each **PrivateMap** method is identical to the corresponding method of
+  the built-in **WeakMap** type.
+
+#### Initialization Model ####
+
+- Each class constructor that contains private fields has an internal slot named
+  [[PrivateFields]] whose value is a non-empty List of **PrivateFieldRecord** objects
+  identifying those private fields.
+- A **PrivateFieldRecord** object has the following internal slots:
+  - [[Map]]: A **PrivateMap** object.
+  - [[Initializer]]: The root node of the parse tree of the private field's initializer
+    expression.
+- Immediately before initializing the **this** value associated with a Function
+  Environment Record to a value _V_, if the environment's [[FunctionObject]] has a
+  [[PrivateFields]] list, then for each private field in the list:
+  - If [[Initializer]] is empty, then let _initialValue_ be **undefined**.
+  - Else let _initialValue_ be the result of evaluating [[Initializer]].
+  - Perform [[Map]].set(_V_, _initialValue_).
 
 #### Private References ####
 
