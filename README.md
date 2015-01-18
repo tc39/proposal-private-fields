@@ -166,9 +166,9 @@ For more complete examples, see:
 
 #### Private References ####
 
-- When an at-name is used as a primary expression such as `@field`, it is equivalent to the
+- When an _AtName_ is used as a primary expression such as `@field`, it is equivalent to the
   member expression `this.@field`.
-- At-name member expressions return a private reference, whose property name component is a **PrivateMap**
+- _AtName_ member expressions return a private reference, whose property name component is a **PrivateMap**
   object.
 - When GetValue is called on a private reference _V_:
     - Let _privateMap_ be GetReferencedName(_V_)
