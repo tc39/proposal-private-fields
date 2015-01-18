@@ -6,7 +6,7 @@ necessary for supporting *high-integrity classes*:
 - **Private Fields** allow per-instance state which is inaccessible outside of the class
   body.
 - **Nested Declarations** allow function, class, and variable declarations within the
-  class body, which have access to private fields.
+  class body which have access to private fields.
 
 ### A Brief Introduction ###
 
