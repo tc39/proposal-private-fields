@@ -1,7 +1,12 @@
 ## ECMAScript Private Fields ##
 
-This proposal extends ECMAScript by introducing *private fields* and other features
-necessary for supporting *high-integrity classes*.
+This proposal extends ECMAScript class syntax by introducing the following features
+necessary for supporting *high-integrity classes*:
+
+- **Private Fields** allow per-instance state which is inaccessible outside of the class
+  body.
+- **Nested Declarations** allow function, class, and variable declarations within the
+  class body, which have access to private fields.
 
 ### A Brief Introduction ###
 
@@ -33,7 +38,7 @@ class Point {
 ```
 
 In the above class, input values are converted to the **Number** type.  If we wanted
-to throw an error when an invalid type is provided, we can use a nested function
+to throw an error when an invalid type is provided, we could use a nested function
 declared within the class body.
 
 ```js
@@ -128,7 +133,6 @@ For more complete examples, see:
         ...
         AtName
 
-
 ### High-Level Semantics ###
 
 #### Private Declarations ####
@@ -145,18 +149,20 @@ For more complete examples, see:
 #### Initialization Model ####
 
 - Each class constructor that contains private fields has an internal slot named
-  [[PrivateFields]] whose value is a non-empty List of **PrivateFieldRecord** objects
+  [[PrivateFields]] whose value is a List of **PrivateFieldRecord** objects
   identifying those private fields.
 - A **PrivateFieldRecord** object has the following internal slots:
   - [[Map]]: A **PrivateMap** object.
   - [[Initializer]]: The root node of the parse tree of the private field's initializer
     expression.
-- Immediately before initializing the **this** value associated with a Function
+- Immediately after initializing the **this** value associated with a Function
   Environment Record to a value _V_, if the environment's [[FunctionObject]] has a
   [[PrivateFields]] list, then for each private field in the list:
   - If [[Initializer]] is empty, then let _initialValue_ be **undefined**.
   - Else let _initialValue_ be the result of evaluating [[Initializer]].
   - Perform [[Map]].set(_V_, _initialValue_).
+- Initializers are evaluated in a new lexical environment whose **this** value is
+  **undefined** and whose parent lexical environment is identified by the class body.
 
 #### Private References ####
 
