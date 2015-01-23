@@ -137,8 +137,8 @@ For more complete examples, see:
 
 #### Private Declarations ####
 
-- A _PrivateDeclaration_ creates a new **PrivateMap** object bound to the lexical environment
-  of the containing _ClassBody_.
+- A _PrivateDeclaration_ creates a new **PrivateMap** object bound to the lexical
+  environment of the containing _ClassBody_.
 - A **PrivateMap** is a specification type with the following methods:
   - has(obj)
   - get(obj)
@@ -155,21 +155,31 @@ For more complete examples, see:
   - [[Map]]: A **PrivateMap** object.
   - [[Initializer]]: The root node of the parse tree of the private field's initializer
     expression.
+- An empty initializer expression is equivalent to **undefined**.
 - Immediately after initializing the **this** value associated with a Function
   Environment Record to a value _V_, if the environment's [[FunctionObject]] has a
-  [[PrivateFields]] list, then for each private field in the list:
-  - If [[Initializer]] is empty, then let _initialValue_ be **undefined**.
-  - Else let _initialValue_ be the result of evaluating [[Initializer]].
-  - Perform [[Map]].set(_V_, _initialValue_).
+  [[PrivateFields]] list, then:
+  1. Let _initialList_ be an empty List.
+  2. For each _field_ in [[PrivateFields]]:
+    1. If _field_.[[Initializer]] is empty, then let _initialValue_ be **undefined**.
+    2. Else
+      1. Let _initialValue_ be the result of evaluating _field_.[[Initializer]].
+      2. ReturnIfAbrupt(_initialValue_).
+      3. NOTE: If any initializer throws an exception then no private fields in
+         [[PrivateFields]] are initialized.
+    3. Append the Record {[[map]]: _field_.[[Map]], [[value]]: _initialValue_} to
+       _initialList_.
+  3. For each Record _e_ in _valueList_:
+  4. Perform _e_.[[map]].set(_V_, _e_.[[value]]).
 - Initializers are evaluated in a new lexical environment whose **this** value is
   **undefined** and whose parent lexical environment is identified by the class body.
 
 #### Private References ####
 
-- When an _AtName_ is used as a primary expression such as `@field`, it is equivalent to the
-  member expression `this.@field`.
-- _AtName_ member expressions return a private reference, whose property name component is a **PrivateMap**
-  object.
+- When an _AtName_ is used as a primary expression such as `@field`, it is equivalent to
+  the member expression `this.@field`.
+- _AtName_ member expressions return a private reference, whose property name component
+  is a **PrivateMap** object.
 - When GetValue is called on a private reference _V_:
     - Let _privateMap_ be GetReferencedName(_V_)
     - If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
@@ -180,4 +190,7 @@ For more complete examples, see:
     - If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
     - Otherwise, return _privateMap_.set(_baseValue_, _W_)
     - NOTE: The prototype chain is not traversed
+- GetValue and SetValue, when evaluated for private references, do not tunnel through
+  proxies.
+- Proxies do not trap private field access.
 
