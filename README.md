@@ -181,15 +181,15 @@ For more complete examples, see:
 - _AtName_ member expressions return a private reference, whose property name component
   is a **PrivateMap** object.
 - When GetValue is called on a private reference _V_:
-    - Let _privateMap_ be GetReferencedName(_V_)
-    - If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
-    - Otherwise, return _privateMap_.get(_baseValue_)
-    - NOTE: The prototype chain is not traversed
+    1. Let _privateMap_ be GetReferencedName(_V_)
+    2. If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
+    3. Return _privateMap_.get(_baseValue_)
+    4. NOTE: The prototype chain is not traversed
 - When SetValue is called on a private reference _V_ with value _W_:
-    - Let _privateMap_ be GetReferencedName(_V_)
-    - If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
-    - Otherwise, return _privateMap_.set(_baseValue_, _W_)
-    - NOTE: The prototype chain is not traversed
+    1. Let _privateMap_ be GetReferencedName(_V_)
+    2. If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
+    3. Return _privateMap_.set(_baseValue_, _W_)
+    4. NOTE: The prototype chain is not traversed
 - GetValue and SetValue, when evaluated for private references, do not tunnel through
   proxies.
 - Proxies do not trap private field access.
