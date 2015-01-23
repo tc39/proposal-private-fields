@@ -170,7 +170,7 @@ For more complete examples, see:
     3. Append the Record {[[map]]: _field_.[[Map]], [[value]]: _initialValue_} to
        _initialList_.
   3. For each Record _e_ in _valueList_:
-  4. Perform _e_.[[map]].set(_V_, _e_.[[value]]).
+     1. Perform _e_.[[map]].set(_V_, _e_.[[value]]).
 - Initializers are evaluated in a new lexical environment whose **this** value is
   **undefined** and whose parent lexical environment is identified by the class body.
 
