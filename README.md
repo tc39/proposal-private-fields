@@ -22,6 +22,31 @@ class Point {
     @y;
 
     constructor(x = 0, y = 0) {
+        this.@x = +x;
+        this.@y = +y;
+    }
+
+    get x() { return this.@x }
+    set x(value) { this.@x = +value }
+
+    get y() { return this.@y }
+    set y(value) { this.@y = +value }
+
+    toString() { return `Point<${ this.@x },${ this.@y }>` }
+
+}
+```
+
+An "at-name" can also appear as a primary expression, in which case `this` is used
+as the implied base value.
+
+```js
+class Point {
+
+    @x;
+    @y;
+
+    constructor(x = 0, y = 0) {
         @x = +x;
         @y = +y;
     }
@@ -32,7 +57,7 @@ class Point {
     get y() { return @y }
     set y(value) { @y = +value }
 
-    toString() { return `Point<${ this.@x },${ this.@y }>` }
+    toString() { return `Point<${ @x },${ @y }>` }
 
 }
 ```
@@ -58,7 +83,7 @@ class Point {
     get y() { return @y }
     set y(value) { @y = _number(value) }
 
-    toString() { return `Point<${ this.@x },${ this.@y }>` }
+    toString() { return `Point<${ @x },${ @y }>` }
 
     function _number(n) {
         // Throw if `n` is not a number or is NaN
