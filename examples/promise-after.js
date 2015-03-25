@@ -126,7 +126,7 @@ class Promise {
 
     static one(values) {
 
-        var deferred = this::_deferred(this);
+        var deferred = this::_deferred();
 
         if (!IsArray(values)) {
 
