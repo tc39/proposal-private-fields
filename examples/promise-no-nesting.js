@@ -25,16 +25,16 @@ class Promise {
         if (!IS_SPEC_FUNCTION(resolver))
             throw MakeTypeError('resolver_not_a_function', [resolver]);
 
-        this.@onResolve = new InternalArray;
-        this.@onReject = new InternalArray;
+        @onResolve = new InternalArray;
+        @onReject = new InternalArray;
 
-        try { resolver(x => { this.@resolve(x) }, r => { this.@reject(r) }) }
-        catch (e) { this.@reject(e) }
+        try { resolver(x => { @resolve(x) }, r => { @reject(r) }) }
+        catch (e) { @reject(e) }
     }
 
     chain(onResolve, onReject) {
 
-        return this.@chain(onResolve, onReject);
+        return @chain(onResolve, onReject);
     }
 
     then(onResolve, onReject) {
@@ -44,7 +44,7 @@ class Promise {
 
         var constructor = this.constructor;
 
-        return this.@chain(x => {
+        return @chain(x => {
 
             x = Promise.@coerce(constructor, x);
 
@@ -60,51 +60,51 @@ class Promise {
         return this.then(void 0, onReject);
     }
 
-    this.@chain(onResolve, onReject) {
+    @chain(onResolve, onReject) {
 
         onResolve = IS_UNDEFINED(onResolve) ? idResolveHandler : onResolve;
         onReject = IS_UNDEFINED(onReject) ? idRejectHandler : onReject;
 
         var deferred = this.constructor.@deferred();
 
-        switch (this.@status) {
+        switch (@status) {
 
             case PENDING:
-                this.@onResolve.push(onResolve, deferred);
-                this.@onReject.push(onReject, deferred);
+                @onResolve.push(onResolve, deferred);
+                @onReject.push(onReject, deferred);
                 break;
 
             case RESOLVED:  // Resolved
-                Promise.@enqueue(this.@value, [onResolve, deferred], RESOLVED);
+                Promise.@enqueue(@value, [onResolve, deferred], RESOLVED);
                 break;
 
             case REJECTED:  // Rejected
-                Promise.@enqueue(this.@value, [onReject, deferred], REJECTED);
+                Promise.@enqueue(@value, [onReject, deferred], REJECTED);
                 break;
         }
 
         // Mark this promise as having handler.
-        this.@hasHandler = true;
+        @hasHandler = true;
 
         return deferred.promise;
     }
 
     @resolve(x) {
 
-        this.@done(RESOLVED, x, this.@onResolve);
+        @done(RESOLVED, x, @onResolve);
     }
 
     @reject(r) {
 
-        this.@done(REJECTED, r, this.@onReject);
+        @done(REJECTED, r, @onReject);
     }
 
     @done(status, value, queue) {
 
-        if (this.@status === PENDING) {
+        if (@status === PENDING) {
 
-            this.@status = status;
-            this.@value = value;
+            @status = status;
+            @value = value;
 
             Promise.@enqueue(value, queue, status);
         }
@@ -112,27 +112,27 @@ class Promise {
 
     static defer() {
 
-        return this.@deferred();
+        return Promise.@deferred();
     }
 
     static accept(x) {
 
-        return this.@accepted(x);
+        return Promise.@accepted(x);
     }
 
     static reject(e) {
 
-        return this.@rejected(e);
+        return Promise.@rejected(e);
     }
 
     static resolve(x) {
 
-        return this.@isPromise(x) ? x : new this(resolve => resolve(x));
+        return Promise.@isPromise(x) ? x : new this(resolve => resolve(x));
     }
 
     static all(values) {
 
-        var deferred = this.@deferred(),
+        var deferred = Promise.@deferred(),
             resolutions = [];
 
         if (!IsArray(values)) {
@@ -180,7 +180,7 @@ class Promise {
 
     static one(values) {
 
-        var deferred = this.@deferred();
+        var deferred = Promise.@deferred();
 
         if (!IsArray(values)) {
 
@@ -207,7 +207,7 @@ class Promise {
 
     static @coerce(constructor, x) {
 
-        if (!this.@isPromise(x) && IS_SPEC_OBJECT(x)) {
+        if (!Promise.@isPromise(x) && IS_SPEC_OBJECT(x)) {
 
             var then;
 
@@ -233,7 +233,7 @@ class Promise {
         EnqueueMicrotask(_=> {
 
             for (var i = 0; i < tasks.length; i += 2)
-                this.@handle(value, tasks[i], tasks[i + 1]);
+                @handle(value, tasks[i], tasks[i + 1]);
         });
     }
 
