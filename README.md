@@ -37,34 +37,8 @@ class Point {
 }
 ```
 
-An "at-name" can also appear as a primary expression, in which case `this` is used
-as the implied base value.
-
-```js
-class Point {
-
-    @x;
-    @y;
-
-    constructor(x = 0, y = 0) {
-        @x = +x;
-        @y = +y;
-    }
-
-    get x() { return @x }
-    set x(value) { @x = +value }
-
-    get y() { return @y }
-    set y(value) { @y = +value }
-
-    toString() { return `Point<${ @x },${ @y }>` }
-
-}
-```
-
 In the above class, input values are converted to the **Number** type.  If we wanted
-to throw an error when an invalid type is provided, we could use a nested function
-declared within the class body.
+to throw an error when an invalid type is provided, we could use a *private method*.
 
 ```js
 class Point {
@@ -73,19 +47,19 @@ class Point {
     @y;
 
     constructor(x = 0, y = 0) {
-        @x = _number(x);
-        @y = _number(y);
+        this.@x = this.@number(x);
+        this.@y = this.@number(y);
     }
 
-    get x() { return @x }
-    set x(value) { @x = _number(value) }
+    get x() { return this.@x }
+    set x(value) { this.@x = this.@number(value) }
 
-    get y() { return @y }
-    set y(value) { @y = _number(value) }
+    get y() { return this.@y }
+    set y(value) { this.@y = this.@number(value) }
 
-    toString() { return `Point<${ @x },${ @y }>` }
+    toString() { return `Point<${ this.@x },${ this.@y }>` }
 
-    function _number(n) {
+    @number(n) {
         // Throw if `n` is not a number or is NaN
         if (+n !== n)
             throw new TypeError("Not a number");
@@ -96,9 +70,7 @@ class Point {
 }
 ```
 
-Because private fields are lexically scoped, declarations nested within the class body
-can access private state.  (This example uses the proposed
-[function bind operator](https://github.com/zenparsing/es-function-bind).)
+Another example using private methods:
 
 ```js
 class Container {
@@ -108,7 +80,7 @@ class Container {
     // Other fields...
 
     clear() {
-        if (this::_isEmpty())
+        if (this.@isEmpty())
             return;
 
         // Empty the container
@@ -116,8 +88,8 @@ class Container {
 
     // Other methods...
 
-    function _isEmpty() {
-        return @count === 0;
+    @isEmpty() {
+        return this.@count === 0;
     }
 }
 ```
@@ -127,8 +99,8 @@ initializers are evaluated when the constructor's **this** value is initialized.
 
 For more complete examples, see:
 
-- [A port of V8's promise implementation](examples/promise-after.js)
-- [A text decoding helper for Node](examples/text-decoder.js)
+- [A port of V8's promise implementation](examples/Promise.js)
+- [A text decoding helper for Node](examples/TextDecoder.js)
 
 ### Syntax ###
 
@@ -140,8 +112,6 @@ For more complete examples, see:
 
     ClassElement[Yield] :
         PrivateDeclaration[?Yield]
-        Declaration[?Yield]
-        VariableStatement[?Yield]
         MethodDefinition[?Yield]
         static MethodDefinition[?Yield]
         ;
