@@ -109,9 +109,9 @@ For more complete examples, see:
 
 In ECMAScript, each object has a collection of properties which are keyed
 on strings and Symbols.  In addition, each object is imbued with a set of
-Symbol-keyed **private slots** which are created when the object is allocated.  
-The collection of private slots is not dynamic.  Private slots may not be added
-or removed after the object is created.
+Symbol-keyed **private slots** which are created when the object is allocated. The
+collection of private slots is not dynamic.  Private slots may not be added or
+removed after the object is created.
 
 #### Constructors and Private Slots ####
 
