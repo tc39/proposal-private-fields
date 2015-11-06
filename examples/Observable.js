@@ -69,21 +69,49 @@ function getMethod(obj, key) {
     return value;
 }
 
-
-let setSubscriptionCleanup,
-    isSubscriptionClosed,
-    releaseSubscription,
-    cancelSubscription;
-
-
 class SubscriptionObserver {
 
     @observer;
     @cleanup;
 
-    constructor(observer) {
+    constructor(observer, subscriber) {
+
+        if (Object(observer) !== observer)
+            throw new TypeError(observer + " is not an object");
+
+        if (typeof subscriber !== "function")
+            throw new TypeError(subscriber + " is not a function");
 
         this.@observer = observer;
+
+        try {
+
+            // Call the subscriber function
+            let cleanup = subscriber.call(undefined, this);
+
+            // The return value must be undefined, null, or a function
+            if (cleanup != null && typeof cleanup !== "function")
+                throw new TypeError(cleanup + " is not a function");
+
+            this.@cleanup = cleanup;
+
+        } catch (e) {
+
+            // If an error occurs during startup, then attempt to send the error
+            // to the observer
+            this.error(e);
+            return;
+        }
+
+        // If the stream is already finished, then perform cleanup
+        if (this.@isClosed())
+            this.@doCleanup();
+    }
+
+    cancel() {
+
+        this.@observer = undefined;
+        this.@doCleanup();
     }
 
     get closed() {
@@ -113,7 +141,7 @@ class SubscriptionObserver {
         } catch (e) {
 
             // If the observer throws, then close the stream and rethrow the error
-            this.@cancel();
+            this.cancel();
             throw e;
         }
     }
@@ -139,7 +167,7 @@ class SubscriptionObserver {
 
         } finally {
 
-            this.@close();
+            this.@doCleanup();
         }
     }
 
@@ -164,7 +192,7 @@ class SubscriptionObserver {
 
         } finally {
 
-            this.@close();
+            this.@doCleanup();
         }
     }
 
@@ -173,13 +201,7 @@ class SubscriptionObserver {
         return this.@observer === undefined;
     }
 
-    @cancel() {
-
-        this.@observer = undefined;
-        this.@close();
-    }
-
-    @close() {
+    @doCleanup() {
 
         // Assert:  @observer is undefined
         let cleanup = this.@cleanup;
@@ -195,17 +217,9 @@ class SubscriptionObserver {
         cleanup();
     }
 
-    static {
-
-        setSubscriptionCleanup = (observer, cleanup) => observer.@cleanup = cleanup;
-        isSubscriptionClosed = (observer) => observer.@isClosed();
-        releaseSubscription = (observer) => observer.@close();
-        cancelSubscription = (observer) => observer.@cancel();
-    }
-
 }
 
-export class Observable {
+class Observable {
 
     @subscriber;
 
@@ -222,37 +236,29 @@ export class Observable {
 
     subscribe(observer) {
 
-        // The observer must be an object
-        if (Object(observer) !== observer)
-            throw new TypeError("Observer must be an object");
+        observer = new SubscriptionObserver(observer, this.@subscriber);
+        return _=> { observer.cancel() };
+    }
 
-        // Wrap the observer in order to maintain observation invariants
-        observer = new SubscriptionObserver(observer);
+    forEach(fn) {
 
-        try {
+        return new Promise((resolve, reject) => {
 
-            // Call the subscriber function
-            let cleanup = this.@subscriber.call(undefined, observer);
+            if (typeof fn !== "function")
+                throw new TypeError(fn + " is not a function");
 
-            // The return value must be undefined, null, or a function
-            if (cleanup != null && typeof cleanup !== "function")
-                throw new TypeError(cleanup + " is not a function");
+            this.subscribe({
 
-            setSubscriptionCleanup(observer, cleanup);
+                next(value) {
 
-        } catch (e) {
+                    try { return fn(value) }
+                    catch (x) { reject(x) }
+                },
 
-            // If an error occurs during startup, then attempt to send the error
-            // to the observer
-            observer.error(e);
-            return;
-        }
-
-        // If the stream is already finished, then perform cleanup
-        if (isSubscriptionClosed(observer))
-            releaseSubscription(observer);
-
-        return _=> { cancelSubscription(observer) };
+                error: reject,
+                complete: resolve,
+            });
+        });
     }
 
     [Symbol.observable]() { return this }
@@ -387,30 +393,6 @@ export class Observable {
             error(value) { return observer.error(value) },
             complete(value) { return observer.complete(value) },
         }));
-    }
-
-    forEach(fn, cancel = undefined) {
-
-        return new Promise((resolve, reject) => {
-
-            if (typeof fn !== "function")
-                throw new TypeError(fn + " is not a function");
-
-            let unsubscribe = this.subscribe({
-
-                next(value) {
-
-                    try { return fn(value) }
-                    catch (x) { reject(x) }
-                },
-
-                error: reject,
-                complete: resolve,
-            });
-
-            if (cancel)
-                cancel.then(unsubscribe);
-        });
     }
 
 }
