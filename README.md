@@ -102,90 +102,34 @@ For more complete examples, see:
 - [A port of V8's promise implementation](examples/Promise.js)
 - [A text decoding helper for Node](examples/TextDecoder.js)
 
-### Syntax ###
 
-    AtName ::
-        @ IdentifierName
+### Private State Object Model ###
 
-    PrivateDeclaration[Yield] :
-        AtName Initializer[?Yield](opt) ;
+#### Private Slots ####
 
-    ClassElement[Yield] :
-        PrivateDeclaration[?Yield]
-        MethodDefinition[?Yield]
-        static MethodDefinition[?Yield]
-        ;
+In ECMAScript, each object has a collection of properties which are keyed
+on strings and Symbols.  In addition, each object is imbued with a set of
+Symbol-keyed **private slots** which are created when the object is allocated.  
+The collection of private slots is not dynamic.  Private slots may not be added
+or removed after the object is created.
 
-    MemberExpression[Yield] :
-        ...
-        MemberExpression[?Yield] . AtName
+#### Constructors and Private Slots ####
 
-    CallExpression[Yield] :
-        ...
-        CallExpression[?Yield] . AtName
+Each ECMAScript function object has an internal slot named `[[PrivateSlotList]]`
+which contains a possibly-empty list of symbols which identify the private slots
+that should be allocated for objects created by the function's `[[Construct]]`
+behavior.
 
-    PrimaryExpression[Yield] :
-        ...
-        AtName
+During object allocation, the `[[PrivateSlotList]]` of `new.target` is consulted
+to determine the private slots which must be allocated for the new object.
+Private slots are initialized to **undefined**.
 
-### High-Level Semantics ###
+`[[PrivateSlotList]]` may not contain duplicate symbols.
 
-#### Private Declarations ####
+#### Private Slot Access ####
 
-- A _PrivateDeclaration_ creates a new **PrivateMap** object bound to the lexical
-  environment of the containing _ClassBody_.
-- A **PrivateMap** is a specification type with the following methods:
-  - has(obj)
-  - get(obj)
-  - set(obj, value)
-- The semantics of each **PrivateMap** method is identical to the corresponding method of
-  the built-in **WeakMap** type.
+Private slots may be accessed by symbol.  If the object does not contain a private
+slot for the provided symbol, a `TypeError` is thrown.  Unlike normal property
+access, if the private slot does not exist then the prototype chain is not traversed.
 
-#### Initialization Model ####
-
-- Each class constructor that contains private fields has an internal slot named
-  [[PrivateFields]] whose value is a List of **PrivateFieldRecord** objects
-  identifying those private fields.
-- A **PrivateFieldRecord** object has the following internal slots:
-  - [[Map]]: A **PrivateMap** object.
-  - [[Initializer]]: The root node of the parse tree of the private field's initializer
-    expression.
-- An empty initializer expression is equivalent to **undefined**.
-- Immediately after initializing the **this** value associated with a Function
-  Environment Record to a value _V_, if the environment's [[FunctionObject]] has a
-  [[PrivateFields]] list, then:
-  1. Let _initialList_ be an empty List.
-  2. For each _field_ in [[PrivateFields]]:
-    1. If _field_.[[Initializer]] is empty, then let _initialValue_ be **undefined**.
-    2. Else
-      1. Let _initialValue_ be the result of evaluating _field_.[[Initializer]].
-      2. ReturnIfAbrupt(_initialValue_).
-      3. NOTE: If any initializer throws an exception then no private fields in
-         [[PrivateFields]] are initialized.
-    3. Append the Record {[[map]]: _field_.[[Map]], [[value]]: _initialValue_} to
-       _initialList_.
-  3. For each Record _e_ in _initialList_:
-     1. Perform _e_.[[map]].set(_V_, _e_.[[value]]).
-- Initializers are evaluated in a new lexical environment whose **this** value is
-  **undefined** and whose parent lexical environment is identified by the class body.
-
-#### Private References ####
-
-- When an _AtName_ is used as a primary expression such as `@field`, it is equivalent to
-  the member expression `this.@field`.
-- _AtName_ member expressions return a private reference, whose property name component
-  is a **PrivateMap** object.
-- When GetValue is called on a private reference _V_:
-    1. Let _privateMap_ be GetReferencedName(_V_).
-    2. If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
-    3. Return _privateMap_.get(_baseValue_).
-    4. NOTE: The prototype chain is not traversed.
-- When SetValue is called on a private reference _V_ with value _W_:
-    1. Let _privateMap_ be GetReferencedName(_V_).
-    2. If _privateMap_.has(_baseValue_) is **false** then throw a **TypeError** exception.
-    3. Return _privateMap_.set(_baseValue_, _W_).
-    4. NOTE: The prototype chain is not traversed.
-- GetValue and SetValue, when evaluated for private references, do not tunnel through
-  proxies.
-- Proxies do not trap private field access.
-
+Proxies do not trap private slot access.
