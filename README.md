@@ -2,9 +2,9 @@
 
 ### A Brief Introduction ###
 
-Private fields are represented as an identifier prefixed with the `#` character.  Private
-fields are lexically confined to their containing class and are not reified.  In the
-following example, `#x` and `#y` are private fields whose type is guaranteed to be
+Private slots are represented as an identifier prefixed with the `#` character.  Private
+slot keys are lexically confined to their containing class body and are not reified.  In the
+following example, `#x` and `#y` are private slots whose type is guaranteed to be
 **Number**.
 
 ```js
@@ -24,6 +24,8 @@ class Point {
     get y() { return this.#y }
     set y(value) { this.#y = +value }
 
+    equals(p) { return this.#x === p.#x && this.#y === p.#y }
+
     toString() { return `Point<${ this.#x },${ this.#y }>` }
 
 }
@@ -36,6 +38,11 @@ when the constructor's **this** value is initialized.
 class Point {
     #x = 0;
     #y = 0;
+
+    constructor() {
+        this.#x; // 0
+        this.#y; // 0
+    }
 }
 ```
 
@@ -72,6 +79,13 @@ Private slots are initialized to **undefined**.
 
 Private slots may be accessed by a lexically scoped private slot key, which may appear
 in a member expression.  If the object does not contain a private slot for the provided key,
-a `TypeError` is thrown.  Unlike normal property access, if the private slot does not exist then the prototype chain is not traversed.
+a `TypeError` is thrown.  Unlike normal property access, if the private slot does not exist
+then the prototype chain is not traversed.
 
 Proxies do not trap private slot access.
+
+### A Note on Aesthetics ###
+
+Octothorp (`#`) looks just plain terrible here.  It would look far better to use `@` as
+the leading prefix in private slot names, but `@` is currently being used by the
+decorators proposal.
