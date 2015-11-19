@@ -62,6 +62,9 @@ on strings and Symbols.  In addition, each object is imbued with a set of
 collection of private slots is not dynamic.  Private slots may not be added or
 removed after the object is created.
 
+Unlike normal property access, during private slot access the prototype chain
+is not traversed and proxies do not trap access.
+
 #### Constructors and Private Slots ####
 
 Each ECMAScript function object has an internal slot named `[[PrivateSlotList]]`
@@ -78,16 +81,46 @@ During object allocation, the `[[PrivateSlotList]]` of `new.target` is consulted
 to determine the private slots which must be allocated for the new object.
 Private slots are initialized to **undefined**.
 
-`[[PrivateSlotList]]` may not contain duplicate keys.
+### Syntax ###
 
-#### Private Slot Access ####
+The lexical grammar is extended with an additional token:
 
-Private slots may be accessed by a lexically scoped private slot key, which may appear
-in a member expression.  If the object does not contain a private slot for the provided key,
-a `TypeError` is thrown.  Unlike normal property access, if the private slot does not exist
-then the prototype chain is not traversed.
+```
+PrivateName ::
+    `#` IdentifierName
+```
 
-Proxies do not trap private slot access.
+Private field declarations are allowed within class bodies:
+
+```
+PrivateDeclaration :
+    PrivateName `;`
+
+ClassElement[Yield] :
+    PrivateDeclaration
+    ...
+```
+
+Each private field declaration creates a lexical binding from a private name to
+a unique private slot key.
+
+Member expressions are extended to allow private references:
+
+```
+MemberExpression :
+    MemberExpression `.` PrivateName
+    ...
+```
+
+When such a reference is evaluated, the private name is lexically resolved to a
+private slot key.  The slot key is then used to access the correct private slot
+on the object.
+
+If the object does not contain the referenced private slot, then the prototype
+chain is not traversed.  Instead, a TypeError is thrown.
+
+It is an early error if a member expression contains a private name which cannot
+be resolved.
 
 ### A Note on Aesthetics ###
 
