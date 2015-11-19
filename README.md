@@ -63,12 +63,6 @@ class Home {
 areLightsOn(new Home()); // false
 ```
 
-For more complete examples, see:
-
-- [A port of V8's promise implementation](examples/Promise.js)
-- [A text decoding helper for Node](examples/TextDecoder.js)
-
-
 ### Private State Object Model ###
 
 #### Private Slots ####
