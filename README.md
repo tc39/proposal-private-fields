@@ -62,7 +62,7 @@ class Home {
 
 areLightsOn(new Home()); // false
 ```
-g
+
 ### Private State Object Model ###
 
 #### Private Slots ####
@@ -101,7 +101,7 @@ PrivateName ::
     `#` IdentifierName
 ```
 
-Private field declarations are allowed within class bodies:
+Private field declarations and class initializer blocks are allowed within class bodies:
 
 ```
 PrivateDeclaration[Yield] :
