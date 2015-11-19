@@ -69,6 +69,11 @@ which contains a possibly-empty list of keys which identify the private slots
 that should be allocated for objects created by the function's `[[Construct]]`
 behavior.
 
+When a class definition is evaluated, the `[[PrivateSlotList]]` of the newly created
+constructor is set to the union of the `[[PrivateSlotList]]` of the superclass (if
+one exists) and the slots declared in the class being evaluated.  Each private slot
+declaration creates a unique private slot key.
+
 During object allocation, the `[[PrivateSlotList]]` of `new.target` is consulted
 to determine the private slots which must be allocated for the new object.
 Private slots are initialized to **undefined**.
