@@ -62,7 +62,7 @@ class Home {
 
 areLightsOn(new Home()); // false
 ```
-
+g
 ### Private State Object Model ###
 
 #### Private Slots ####
@@ -104,8 +104,8 @@ PrivateName ::
 Private field declarations are allowed within class bodies:
 
 ```
-PrivateDeclaration :
-    PrivateName `;`
+PrivateDeclaration[Yield] :
+    PrivateName Initializer[Yield]?  `;`
 
 ClassElement[Yield] :
     PrivateDeclaration
@@ -115,6 +115,10 @@ ClassElement[Yield] :
 
 Each private field declaration creates a lexical binding from a private name to
 a unique private slot key.
+
+If an initializer is provided, it is run immediately after the **this** value has
+been bound to the new object.  In derived classes, this will occur after the super
+call is evaluated.
 
 It is a syntax error if there exists more than one class initializer block.  The
 class initializer block is executed once at the end of class definition evaluation.
