@@ -146,3 +146,7 @@ be resolved.
 Octothorp (`#`) looks just plain terrible here.  It would look far better to use `@` as
 the leading prefix in private slot names, but `@` is currently being used by the
 decorators proposal.
+
+### Frequently Asked Questions ###
+
+- [Why do we have to use a special character in front of the identifier?](https://github.com/zenparsing/es-private-fields/issues/14)
