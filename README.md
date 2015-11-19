@@ -46,6 +46,23 @@ class Point {
 }
 ```
 
+It is sometimes necessary to access private slots outside of the class body in
+which they were defined.  We can accomplish this with a *static initialization block*:
+
+```js
+let areLightsOn;
+
+class Home {
+    #lightsOn = false;
+
+    static {
+        areLightsOn = home => home.#lightsOn;
+    }
+}
+
+areLightsOn(new Home()); // false
+```
+
 For more complete examples, see:
 
 - [A port of V8's promise implementation](examples/Promise.js)
@@ -98,11 +115,15 @@ PrivateDeclaration :
 
 ClassElement[Yield] :
     PrivateDeclaration
+    `static` Block
     ...
 ```
 
 Each private field declaration creates a lexical binding from a private name to
 a unique private slot key.
+
+It is a syntax error if there exists more than one class initializer block.  The
+class initializer block is executed once at the end of class definition evaluation.
 
 Member expressions are extended to allow private references:
 
