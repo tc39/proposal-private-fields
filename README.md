@@ -150,3 +150,4 @@ decorators proposal.
 ### Frequently Asked Questions ###
 
 - [Why do we have to use a special character in front of the identifier?](https://github.com/zenparsing/es-private-fields/issues/14)
+- [Why not use a private version of Symbols?](https://github.com/zenparsing/es-abstract-refs/issues/11)
