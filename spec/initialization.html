@@ -1,11 +1,46 @@
-<emu-clause id="sec-initializeinternalslots" aoid="InitializeInternalSlots">
-  <h1>InitializeInternalSlots ( _O_, _internalSlotsList_ )</h1>
+<emu-clause id="sec-getinternalslotslist" aoid="GetInternalSlotsList">
+  <h1>GetInternalSlotsFromConstructor ( _constructor_ )</h1>
+  <emu-alg>
+    1. Assert: _constructor_ is an ECMAScript function object.
+    1. Let _slotDefinitions_ be the value of _constructor_'s [[InstanceSlots]] internal slot.
+    1. Let _keys_ be a new empty List.
+    1. For each element _slotDefinition_ of _slotDefinitions_,
+      1. Append _slotDefinition_.[[key]] to _keys_.
+    1. Return _keys_.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-addinternalslots" aoid="AddInternalSlots">
+  <h1>AddInternalSlots ( _O_, _internalSlotsList_ )</h1>
   <emu-alg>
     1. For each element _slotKey_ in _internalSlotsList_,
       1. If _O_ has an internal slot named _slotKey_, then
         1. Set the value of the internal slot named _slotKey_ of _O_ to *undefined*.
       1. Else,
-        1. Create an internal slot name _slotKey_ of _O_ whose value is *undefined*.
+        1. Create an internal slot named _slotKey_ of _O_ whose value is *undefined*.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-intiializeinstanceslots" aoid="InitializeInstanceSlots">
+  <h1>InitializeInstanceSlots ( _obj_, _constructor_ )</h1>
+  <emu-alg>
+    1. Assert: Type(_obj) is Object.
+    1. Assert: _constructor_ is an ECMAScript function object.
+    1. Let _lex_ be the Lexical Environment of the running execution context.
+    1. Let _initializerScope_ be the value of _constructor_'s [[Environment]] internal slot.
+    1. Set the running execution context's LexicalEnvironment to _initializerScope_.
+    1. Let _slotDefinitions_ be the value of _constructor_'s [[InstanceSlots]] internal slot.
+    1. For element element _slotDefinition_ of _slotDefinitions_,
+      1. Let _initializer_ be _slotDefinition_.[[initializer]].
+      1. If _initializer_ is not ~empty~, then
+        1. Let _result_ be the result of evaluating _initializer_.
+        1. Let _initialValue_ be GetValue(_result_).
+        1. If _initialValue_ is an abrupt completion, then
+          1. Set the running execution context's LexicalEnvironment to _lex_.
+          1. Return Completion(_initialValue_).
+        1. Set the value of the internal slot named _slotDefinition_.[[key]] of _obj_ to _initialValue_.[[value]].
+    1. Set the running execution context's LexicalEnvironment to _lex_.
+    1. Return *undefined*.
   </emu-alg>
 </emu-clause>
 
@@ -18,7 +53,7 @@
   <emu-alg>
     1. If _internalSlotsList_ was not provided, let _internalSlotsList_ be an empty List.
     1. Let _obj_ be a newly created object.
-    1. Perform ! InitializeInternalSlots(_internalSlotsList_).
+    1. Perform ! AddInternalSlots(_internalSlotsList_).
     1. Set _obj_'s essential internal methods to the default ordinary object definitions specified in <emu-xref href="#sec-ordinary-object-internal-methods-and-internal-slots"></emu-xref>.
     1. Set the [[Prototype]] internal slot of _obj_ to _proto_.
     1. Set the [[Extensible]] internal slot of _obj_ to *true*.
@@ -38,12 +73,12 @@
     1. Let _callerContext_ be the running execution context.
     1. Let _kind_ be _F_'s [[ConstructorKind]] internal slot.
     1. If _kind_ is `"base"`, then
-      1. Let _instanceSlots_ be the value of _F_'s [[InstanceSlots]] internal slot.
-      1. Let _thisArgument_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%ObjectPrototype%"`, _instanceSlots_).
+      1. Let _internalSlots_ be ! GetInternalSlotsFromConstructor(_F_).
+      1. Let _thisArgument_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%ObjectPrototype%"`, _internalSlots_).
     1. Let _calleeContext_ be PrepareForOrdinaryCall(_F_, _newTarget_).
     1. Assert: _calleeContext_ is now the running execution context.
     1. If _kind_ is `"base"`, then
-      1. NOTE: Private field initializers should be evaluated here.
+      1. Perform ? InitializeInstanceSlots(_result_, _F_).
       1. Perform ! OrdinaryCallBindThis(_F_, _calleeContext_, _thisArgument_).
     1. Let _constructorEnv_ be the LexicalEnvironment of _calleeContext_.
     1. Let _envRec_ be _constructorEnv_'s EnvironmentRecord.
@@ -64,7 +99,7 @@
   <emu-clause id="sec-super-keyword-runtime-semantics-evaluation">
     <h1>Runtime Semantics: Evaluation</h1>
     <emu-note>
-      <p>This algorithm method has been updated to get [[InstanceSlots]] from the current active function object and pass that List to InitializeInternalSlots.  It also inlines the abstract operation GetSuperConstructor.</p>
+      <p>This algorithm method has been updated to get [[InstanceSlots]] from the current active function object and use that list to add and initialize the appropriate internal slots to the object returned from the base class constructor.  It also inlines the abstract operation GetSuperConstructor.</p>
     </emu-note>
     <emu-grammar>SuperCall : `super` Arguments</emu-grammar>
     <emu-alg>
@@ -79,9 +114,9 @@
       1. Let _argList_ be ArgumentListEvaluation of |Arguments|.
       1. ReturnIfAbrupt(_argList_).
       1. Let _result_ be ? Construct(_superConstructor_, _argList_, _newTarget_).
-      1. Let _instanceSlots_ be the value of _F_'s [[InstanceSlots]] internal slot.
-      1. Perform ! InitializeInternalSlots(_result_, _instanceSlots_).
-      1. NOTE: Private field initializers should be evaluated here.
+      1. Let _internalSlots_ be ? GetInternalSlotsFromConstructor(_F_).
+      1. Perform ! AddInternalSlots(_result_, _internalSlots_).
+      1. Perform ? InitializeInstanceSlots(_result_, _F_).
       1. Return ? _thisER_.BindThisValue(_result_).
     </emu-alg>
 

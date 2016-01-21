@@ -1,0 +1,118 @@
+<h2>Syntax</h2>
+<emu-grammar>
+  ClassElement[Yield] :
+    MethodDefinition[?Yield]
+    `static` MethodDefinition[?Yield]
+    PrivateFieldDefinition[?Yield]
+    `;`
+
+  PrivateFieldDefinition[Yield] :
+    PrivateName Initializer[In, ?Yield]? `;`
+</emu-grammar>
+
+<!-- TODO Lexical grammar for PrivateName, StringValue of PrivateName. -->
+
+<!-- TODO Other static rules which might be needed for class evaluation: IsStatic, PropName -->
+
+<!-- TODO Modify NonConstructorMethodDefinitions so that it doesn't include private field definitions -->
+
+<emu-clause id="sec-private-field-definitions">
+  <h1>Static Semantics: PrivateFieldDefinitions</h1>
+  <emu-grammar>ClassElementList : ClassElement</emu-grammar>
+  <emu-alg>
+    1. If |ClassElement| is the production <emu-grammar>ClassElement : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar> , return |ClassElement|.
+    1. Else, return a new empty List.
+  </emu-alg>
+  <emu-grammar>ClassElementList : ClassElementList ClassElement</emu-grammar>
+  <emu-alg>
+    1. Let _list_ be InstanceSlotDefinitions of |ClassElementList|.
+    1. If |ClassElement| is the production <emu-grammar>ClassElement : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar> , append |ClassElement| to the end of _list_.
+    1. Return _list_.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-instance-slot-definition">
+  <h1>Runtime Semantics: CreateInstanceSlotDefinition</h1>
+  <emu-grammar>ClassElement : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar>
+  <emu-alg>
+    1. Let _bindingName_ be StringValue of |PrivateName|.
+    1. Let _slotKey_ be a new unique internal slot key.
+    1. Let _scope_ be the running execution context's LexicalEnvironment.
+    1. Perform ! _scope_.CreateImmutableBinding(_bindingName_, _slotKey_).
+    1. If |Initializer_opt| is present, let _initializer_ be |Initializer_opt|.
+    1. Else, let _initializer_ be ~empty~.
+    1. Return Record{[[key]]: _slotKey_, [[initializer]]: _initializer_}.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-runtime-semantics-classdefinitionevaluation">
+  <h1>Runtime Semantics: ClassDefinitionEvaluation</h1>
+  <p>With parameter _className_.</p>
+  <emu-note>
+    This algorithm is modified to create bindings in the lexical scope of the class body for each private field name and populate the [[InstanceSlot]] internal slot of the new constructor.
+  </emu-note>
+  <emu-grammar>ClassTail : ClassHeritage? `{` ClassBody? `}`</emu-grammar>
+  <emu-alg>
+    1. Let _lex_ be the LexicalEnvironment of the running execution context.
+    1. Let _classScope_ be NewDeclarativeEnvironment(_lex_).
+    1. Let _classScopeEnvRec_ be _classScope_'s EnvironmentRecord.
+    1. If _className_ is not *undefined*, then
+      1. Perform _classScopeEnvRec_.CreateImmutableBinding(_className_, *true*).
+    1. If |ClassHeritage_opt| is not present, then
+      1. Let _protoParent_ be the intrinsic object %ObjectPrototype%.
+      1. Let _constructorParent_ be the intrinsic object %FunctionPrototype%.
+    1. Else,
+      1. Set the running execution context's LexicalEnvironment to _classScope_.
+      1. Let _superclass_ be the result of evaluating |ClassHeritage|.
+      1. Set the running execution context's LexicalEnvironment to _lex_.
+      1. ReturnIfAbrupt(_superclass_).
+      1. If _superclass_ is *null*, then
+        1. Let _protoParent_ be *null*.
+        1. Let _constructorParent_ be the intrinsic object %FunctionPrototype%.
+      1. Else if IsConstructor(_superclass_) is *false*, throw a *TypeError* exception.
+      1. Else,
+        1. Let _protoParent_ be ? Get(_superclass_, `"prototype"`).
+        1. If Type(_protoParent_) is neither Object nor Null, throw a *TypeError* exception.
+        1. Let _constructorParent_ be _superclass_.
+    1. Let _proto_ be ObjectCreate(_protoParent_).
+    1. If |ClassBody_opt| is not present, let _constructor_ be ~empty~.
+    1. Else, let _constructor_ be ConstructorMethod of |ClassBody|.
+    1. If _constructor_ is ~empty~, then
+      1. If |ClassHeritage_opt| is present, then
+        1. Let _constructor_ be the result of parsing the source text
+          <pre><code class="javascript">constructor(... args){ super (...args);}</code></pre>
+          using the syntactic grammar with the goal symbol |MethodDefinition|.
+      1. Else,
+        1. Let _constructor_ be the result of parsing the source text
+          <pre><code class="javascript">constructor( ){ }</code></pre>
+          using the syntactic grammar with the goal symbol |MethodDefinition|.
+    1. Set the running execution context's LexicalEnvironment to _classScope_.
+    1. Let _constructorInfo_ be the result of performing DefineMethod for _constructor_ with arguments _proto_ and _constructorParent_ as the optional _functionPrototype_ argument.
+    1. Assert: _constructorInfo_ is not an abrupt completion.
+    1. Let _F_ be _constructorInfo_.[[closure]].
+    1. If |ClassHeritage_opt| is present, set _F_'s [[ConstructorKind]] internal slot to `"derived"`.
+    1. Perform MakeConstructor(_F_, *false*, _proto_).
+    1. Perform MakeClassConstructor(_F_).
+    1. Perform CreateMethodProperty(_proto_, `"constructor"`, _F_).
+    1. If |ClassBody_opt| is not present, let _methods_ be a new empty List.
+    1. Else, let _methods_ be NonConstructorMethodDefinitions of |ClassBody|.
+    1. For each |ClassElement| _m_ in order from _methods_
+      1. If IsStatic of _m_ is *false*, then
+        1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _proto_ and *false*.
+      1. Else,
+        1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _F_ and *false*.
+      1. If _status_ is an abrupt completion, then
+        1. Set the running execution context's LexicalEnvironment to _lex_.
+        1. Return Completion(_status_).
+    1. If |ClassBody_opt| is not present, let _fields_ be a new empty List.
+    1. Else, let _fields_ be PrivateFieldDefinitions of |ClassBody|.
+    1. Let _slotDefinitions_ be the value of _F_'s [[InstanceSlots]] internal slot.
+    1. For each |ClassElement| _f_ in order from _fields_
+      1. Let _slotDefinition_ be the result of performing CreateInstanceSlotDefinition for _f_.
+      1. Append _slotDefinition_ to _slotDefinitions_.
+    1. Set the running execution context's LexicalEnvironment to _lex_.
+    1. If _className_ is not *undefined*, then
+      1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
+    1. Return _F_.
+  </emu-alg>
+</emu-clause>
