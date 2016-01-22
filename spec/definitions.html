@@ -1,5 +1,9 @@
 <h2>Syntax</h2>
 <emu-grammar>
+  PrivateName ::
+    `#` IdentifierPart
+    PrivateName IdentifierPart
+
   ClassElement[Yield] :
     MethodDefinition[?Yield]
     `static` MethodDefinition[?Yield]
@@ -10,7 +14,18 @@
     PrivateName Initializer[In, ?Yield]? `;`
 </emu-grammar>
 
-<!-- TODO Lexical grammar for PrivateName, StringValue of PrivateName. -->
+<emu-clause id="sec-private-names-static-semantics-stringvalue">
+  <h1>Static Semantics: StringValue</h1>
+  <emu-see-also-para op="StringValue"></emu-see-also-para>
+  <emu-grammar>
+    PrivateName ::
+      `#` IdentifierPart
+      PrivateName IdentifierPart
+  </emu-grammar>
+  <emu-alg>
+    1. Return the String value consisting of the sequence of code units corresponding to |PrivateName|. In determining the sequence any occurrences of `\\` |UnicodeEscapeSequence| are first replaced with the code point represented by the |UnicodeEscapeSequence| and then the code points of the entire |PrivateName| are converted to code units by UTF16Encoding (<emu-xref href="#sec-utf16encoding"></emu-xref>) each code point.
+  </emu-alg>
+</emu-clause>
 
 <!-- TODO Other static rules which might be needed for class evaluation: IsStatic, PropName -->
 
@@ -20,20 +35,20 @@
   <h1>Static Semantics: PrivateFieldDefinitions</h1>
   <emu-grammar>ClassElementList : ClassElement</emu-grammar>
   <emu-alg>
-    1. If |ClassElement| is the production <emu-grammar>ClassElement : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar> , return |ClassElement|.
+    1. If |ClassElement| is the production <emu-grammar>ClassElement : PrivateFieldDefinition</emu-grammar> , return a List containing |ClassElement|.
     1. Else, return a new empty List.
   </emu-alg>
   <emu-grammar>ClassElementList : ClassElementList ClassElement</emu-grammar>
   <emu-alg>
-    1. Let _list_ be InstanceSlotDefinitions of |ClassElementList|.
-    1. If |ClassElement| is the production <emu-grammar>ClassElement : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar> , append |ClassElement| to the end of _list_.
+    1. Let _list_ be PrivateFieldDefinitions of |ClassElementList|.
+    1. If |ClassElement| is the production <emu-grammar>PrivateFieldDefinition</emu-grammar> , append |ClassElement| to the end of _list_.
     1. Return _list_.
   </emu-alg>
 </emu-clause>
 
 <emu-clause id="sec-instance-slot-definition">
-  <h1>Runtime Semantics: CreateInstanceSlotDefinition</h1>
-  <emu-grammar>ClassElement : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar>
+  <h1>Runtime Semantics: PrivateFieldDefinitionEvaluation</h1>
+  <emu-grammar>PrivateFieldDefinition : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar>
   <emu-alg>
     1. Let _bindingName_ be StringValue of |PrivateName|.
     1. Let _slotKey_ be a new unique internal slot key.
@@ -96,7 +111,7 @@
     1. Perform CreateMethodProperty(_proto_, `"constructor"`, _F_).
     1. If |ClassBody_opt| is not present, let _methods_ be a new empty List.
     1. Else, let _methods_ be NonConstructorMethodDefinitions of |ClassBody|.
-    1. For each |ClassElement| _m_ in order from _methods_
+    1. For each |ClassElement| _m_ in order from _methods_,
       1. If IsStatic of _m_ is *false*, then
         1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _proto_ and *false*.
       1. Else,
@@ -107,8 +122,8 @@
     1. If |ClassBody_opt| is not present, let _fields_ be a new empty List.
     1. Else, let _fields_ be PrivateFieldDefinitions of |ClassBody|.
     1. Let _slotDefinitions_ be the value of _F_'s [[InstanceSlots]] internal slot.
-    1. For each |ClassElement| _f_ in order from _fields_
-      1. Let _slotDefinition_ be the result of performing CreateInstanceSlotDefinition for _f_.
+    1. For each |ClassElement| _f_ in order from _fields_,
+      1. Let _slotDefinition_ be the result of performing PrivateFieldDefinitionEvaluation for _f_.
       1. Append _slotDefinition_ to _slotDefinitions_.
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. If _className_ is not *undefined*, then

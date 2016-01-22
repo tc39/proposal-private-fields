@@ -22,9 +22,9 @@
 </emu-clause>
 
 <emu-clause id="sec-intiializeinstanceslots" aoid="InitializeInstanceSlots">
-  <h1>InitializeInstanceSlots ( _obj_, _constructor_ )</h1>
+  <h1>InitializeInstanceSlots ( _O_, _constructor_ )</h1>
   <emu-alg>
-    1. Assert: Type(_obj) is Object.
+    1. Assert: Type(_O_) is Object.
     1. Assert: _constructor_ is an ECMAScript function object.
     1. Let _lex_ be the Lexical Environment of the running execution context.
     1. Let _initializerScope_ be the value of _constructor_'s [[Environment]] internal slot.
@@ -38,7 +38,7 @@
         1. If _initialValue_ is an abrupt completion, then
           1. Set the running execution context's LexicalEnvironment to _lex_.
           1. Return Completion(_initialValue_).
-        1. Set the value of the internal slot named _slotDefinition_.[[key]] of _obj_ to _initialValue_.[[value]].
+        1. Set the value of the internal slot named _slotDefinition_.[[key]] of _O_ to _initialValue_.[[value]].
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. Return *undefined*.
   </emu-alg>
@@ -64,7 +64,7 @@
 <emu-clause id="sec-ecmascript-function-objects-construct-argumentslist-newtarget">
   <h1>[[Construct]] ( _argumentsList_, _newTarget_ )</h1>
   <emu-note>
-    <p>This algorithm has been updated to get [[InstanceSlots]] from _F_ and pass that List to OrdinaryCreateFromConstructor.</p>
+    <p>This algorithm has been updated to get a list of slots names from the [[InstanceSlots]] internal slot of _F_ and pass that list to OrdinaryCreateFromConstructor.  It also uses [[InstanceSlots]] to initialize the new object's internal slots.</p>
   </emu-note>
   <p>The [[Construct]] internal method for an ECMAScript Function object _F_ is called with parameters _argumentsList_ and _newTarget_. _argumentsList_ is a possibly empty List of ECMAScript language values. The following steps are taken:</p>
   <emu-alg>
