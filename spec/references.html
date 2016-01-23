@@ -1,7 +1,26 @@
+<h2>Syntax</h2>
+<emu-grammar>
+  MemberExpression[Yield] :
+    MemberExpression[?Yield] `.` PrivateName
+</emu-grammar>
+
+<emu-clause id="sec-private-references-runtime-semantics-evaluation">
+  <h1>Runtime Semantics: Evaluation</h1>
+  <emu-grammar>MemberExpression : MemberExpression `.` PrivateName</emu-grammar>
+  <emu-alg>
+    1. Let _baseReference_ be the result of evaluating |MemberExpression|.
+    1. Let _baseValue_ be ? GetValue(_baseReference_).
+    1. Let _bv_ be ? RequireObjectCoercible(_baseValue_).
+    1. Let _slotStringName_ be StringValue of |PrivateName|.
+    1. Let _resolvedKey_ be ? ResolveBinding(_slotStringName_).
+    1. Return a value of type Reference whose base value is _bv_ and whose referenced name is _resolvedKey_, and whose strict reference flag is *true*.
+  </emu-alg>
+</emu-clause>
+
 <emu-clause id="sec-reference-specification-type">
   <h1>The Reference Specification Type</h1>
   <emu-note>
-    <p>This section has been modified to support Private References.  A Private Reference is a property references whose <i>referenced name</i> component is an internal slot key.</p>
+    <p>This section has been modified to support Private References.  A Private Reference is a Reference whose <i>referenced name</i> component is an internal slot key.</p>
   </emu-note>
   <emu-note>
     <p>The Reference type is used to explain the behaviour of such operators as `delete`, `typeof`, the assignment operators, the `super` keyword and other language features. For example, the left-hand operand of an assignment is expected to produce a reference.</p>
@@ -108,24 +127,5 @@
     1. If _O_ does not have an internal slot named _slotKey_, throw a TypeError exception.
     1. Set the value of  the value of _O_'s internal slot named _slotKey_ to _value_.
     1. Return.
-  </emu-alg>
-</emu-clause>
-
-<h2>Syntax</h2>
-<emu-grammar>
-  MemberExpression[Yield] :
-    MemberExpression[?Yield] `.` PrivateName
-</emu-grammar>
-
-<emu-clause id="sec-private-references-runtime-semantics-evaluation">
-  <h1>Runtime Semantics: Evaluation</h1>
-  <emu-grammar>MemberExpression : MemberExpression `.` PrivateName</emu-grammar>
-  <emu-alg>
-    1. Let _baseReference_ be the result of evaluating |MemberExpression|.
-    1. Let _baseValue_ be ? GetValue(_baseReference_).
-    1. Let _bv_ be ? RequireObjectCoercible(_baseValue_).
-    1. Let _slotStringName_ be StringValue of |PrivateName|.
-    1. Let _resolvedKey_ be ? ResolveBinding(_slotStringName_).
-    1. Return a value of type Reference whose base value is _bv_ and whose referenced name is _resolvedKey_, and whose strict reference flag is *true*.
   </emu-alg>
 </emu-clause>
