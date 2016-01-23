@@ -1,10 +1,122 @@
+<emu-clause id="sec-reference-specification-type">
+  <h1>The Reference Specification Type</h1>
+  <emu-note>
+    <p>This section has been modified to support Private References.  A Private Reference is a property references whose <i>referenced name</i> component is an internal slot key.</p>
+  </emu-note>
+  <emu-note>
+    <p>The Reference type is used to explain the behaviour of such operators as `delete`, `typeof`, the assignment operators, the `super` keyword and other language features. For example, the left-hand operand of an assignment is expected to produce a reference.</p>
+  </emu-note>
+  <p>A <dfn>Reference</dfn> is a resolved name or property binding. A Reference consists of three components, the <em>base</em> value, the <em>referenced name</em> and the Boolean valued <em>strict reference</em> flag. The <em>base</em> value is either *undefined*, an Object, a Boolean, a String, a Symbol, a Number, or an Environment Record (<emu-xref href="#sec-environment-records"></emu-xref>). A _base_ value of *undefined* indicates that the Reference could not be resolved to a binding. The <em>referenced name</em> is a String value, a Symbol value, or an internal slot key.</p>
+  <p>A Super Reference is a Reference that is used to represents a name binding that was expressed using the super keyword. A Super Reference has an additional _thisValue_ component and its _base_ value will never be an Environment Record.</p>
+  <p>The following abstract operations are used in this specification to access the components of references:</p>
+  <ul>
+    <li>
+      GetBase(V). Returns the _base_ value component of the reference V.
+    </li>
+    <li>
+      GetReferencedName(V). Returns the <i>referenced name</i> component of the reference V.
+    </li>
+    <li>
+      IsStrictReference(V). Returns the <i>strict reference</i> flag component of the reference V.
+    </li>
+    <li>
+      HasPrimitiveBase(V). Returns *true* if Type(_base_) is Boolean, String, Symbol, or Number.
+    </li>
+    <li>
+      IsPropertyReference(V). Returns *true* if either the _base_ value is an object or HasPrimitiveBase(V) is *true*; otherwise returns *false*.
+    </li>
+    <li>
+      IsUnresolvableReference(V). Returns *true* if the _base_ value is *undefined* and *false* otherwise.
+    </li>
+    <li>
+      IsSuperReference(V). Returns *true* if this reference has a _thisValue_ component.
+    </li>
+    <li>
+      IsPrivateReference(V). Returns *true* if the <i>referenced name</i> component is an internal slot key.
+    </li>
+  </ul>
+  <p>The following abstract operations are used in this specification to operate on references:</p>
+
+  <!-- es6num="6.2.3.1" -->
+  <emu-clause id="sec-getvalue" aoid="GetValue">
+    <h1>GetValue ( _V_ )</h1>
+    <emu-alg>
+      1. ReturnIfAbrupt(_V_).
+      1. If Type(_V_) is not Reference, return _V_.
+      1. Let _base_ be GetBase(_V_).
+      1. If IsUnresolvableReference(_V_), throw a *ReferenceError* exception.
+      1. If IsPropertyReference(_V_), then
+        1. If HasPrimitiveBase(_V_), then
+          1. Assert: In this case, _base_ will never be *null* or *undefined*.
+          1. Let _base_ be ToObject(_base_).
+        1. If IsPrivateReference(_V_), then
+          1. Return ? GetPrivate(_base_, GetReferencedName(_V_)).
+        1. Return ? _base_.[[Get]](GetReferencedName(_V_), GetThisValue(_V_)).
+      1. Else _base_ must be an Environment Record,
+        1. Return ? _base_.GetBindingValue(GetReferencedName(_V_), IsStrictReference(_V_)) (see <emu-xref href="#sec-environment-records"></emu-xref>).
+    </emu-alg>
+    <emu-note>
+      <p>The object that may be created in step 5.a.ii is not accessible outside of the above abstract operation and the ordinary object [[Get]] internal method. An implementation might choose to avoid the actual creation of the object.</p>
+    </emu-note>
+  </emu-clause>
+
+  <!-- es6num="6.2.3.2" -->
+  <emu-clause id="sec-putvalue" aoid="PutValue">
+    <h1>PutValue (_V_, _W_)</h1>
+    <emu-alg>
+      1. ReturnIfAbrupt(_V_).
+      1. ReturnIfAbrupt(_W_).
+      1. If Type(_V_) is not Reference, throw a *ReferenceError* exception.
+      1. Let _base_ be GetBase(_V_).
+      1. If IsUnresolvableReference(_V_), then
+        1. If IsStrictReference(_V_) is *true*, then
+          1. Throw a *ReferenceError* exception.
+        1. Let _globalObj_ be GetGlobalObject().
+        1. Return ? Set(_globalObj_, GetReferencedName(_V_), _W_, *false*).
+      1. Else if IsPropertyReference(_V_), then
+        1. If HasPrimitiveBase(_V_) is *true*, then
+          1. Assert: In this case, _base_ will never be *null* or *undefined*.
+          1. Set _base_ to ToObject(_base_).
+        1. If IsPrivateReference(_V_), then
+            1. Return ? SetPrivate(_base_, GetReferencedName(_V_), _W_).
+        1. Let _succeeded_ be ? _base_.[[Set]](GetReferencedName(_V_), _W_, GetThisValue(_V_)).
+        1. If _succeeded_ is *false* and IsStrictReference(_V_) is *true*, throw a *TypeError* exception.
+        1. Return.
+      1. Else _base_ must be an Environment Record.
+        1. Return ? _base_.SetMutableBinding(GetReferencedName(_V_), _W_, IsStrictReference(_V_)) (see <emu-xref href="#sec-environment-records"></emu-xref>).
+    </emu-alg>
+    <emu-note>
+      <p>The object that may be created in step 6.a.ii is not accessible outside of the above algorithm and the ordinary object [[Set]] internal method. An implementation might choose to avoid the actual creation of that object.</p>
+    </emu-note>
+  </emu-clause>
+
+</emu-clause>
+
+<emu-clause id="sec-getprivate" aoid="GetPrivate">
+  <h1>GetPrivate (_O_, _slotKey_)</h1>
+  <emu-alg>
+    1. Assert: Type(_O_) is Object.
+    1. If _O_ does not have an internal slot named _slotKey_, throw a TypeError exception.
+    1. Return the value of _O_'s internal slot named _slotKey_.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-getprivate" aoid="GetPrivate">
+  <h1>SetPrivate (_O_, _slotKey_, _value_)</h1>
+  <emu-alg>
+    1. Assert: Type(_O_) is Object.
+    1. If _O_ does not have an internal slot named _slotKey_, throw a TypeError exception.
+    1. Set the value of  the value of _O_'s internal slot named _slotKey_ to _value_.
+    1. Return.
+  </emu-alg>
+</emu-clause>
+
 <h2>Syntax</h2>
 <emu-grammar>
   MemberExpression[Yield] :
     MemberExpression[?Yield] `.` PrivateName
 </emu-grammar>
 
-<!--
 <emu-clause id="sec-private-references-runtime-semantics-evaluation">
   <h1>Runtime Semantics: Evaluation</h1>
   <emu-grammar>MemberExpression : MemberExpression `.` PrivateName</emu-grammar>
@@ -13,7 +125,7 @@
     1. Let _baseValue_ be ? GetValue(_baseReference_).
     1. Let _bv_ be ? RequireObjectCoercible(_baseValue_).
     1. Let _slotStringName_ be StringValue of |PrivateName|.
-    1. Return a value of type Reference whose base value is _bv_ and whose referenced name is _propertyNameString_, and whose strict reference flag is _strict_.
+    1. Let _resolvedKey_ be ? ResolveBinding(_slotStringName_).
+    1. Return a value of type Reference whose base value is _bv_ and whose referenced name is _resolvedKey_, and whose strict reference flag is *true*.
   </emu-alg>
 </emu-clause>
--->

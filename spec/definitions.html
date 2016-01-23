@@ -1,4 +1,5 @@
 <h2>Syntax</h2>
+<!-- TODO: Do we want to allow @1, for instance? -->
 <emu-grammar>
   PrivateName ::
     `#` IdentifierPart
@@ -41,7 +42,7 @@
   <emu-grammar>ClassElementList : ClassElementList ClassElement</emu-grammar>
   <emu-alg>
     1. Let _list_ be PrivateFieldDefinitions of |ClassElementList|.
-    1. If |ClassElement| is the production <emu-grammar>PrivateFieldDefinition</emu-grammar> , append |ClassElement| to the end of _list_.
+    1. If |ClassElement| is the production <emu-grammar>ClassElement : PrivateFieldDefinition</emu-grammar> , append |ClassElement| to the end of _list_.
     1. Return _list_.
   </emu-alg>
 </emu-clause>
