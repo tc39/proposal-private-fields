@@ -17,6 +17,34 @@
   </emu-alg>
 </emu-clause>
 
+<emu-clause id="sec-delete-operator">
+  <h1>The `delete` Operator</h1>
+
+  <!-- es6num="12.5.4.1" -->
+  <emu-clause id="sec-delete-operator-static-semantics-early-errors">
+    <h1>Static Semantics: Early Errors</h1>
+    <emu-note>
+      <p>The static rules have been modified to produce an early error if the `delete` operator is applied to a private reference.</p>
+    </emu-note>
+    <emu-grammar>UnaryExpression : `delete` UnaryExpression</emu-grammar>
+    <ul>
+      <li>
+        It is a Syntax Error if the |UnaryExpression| is contained in strict mode code and the derived |UnaryExpression| is <emu-grammar>PrimaryExpression : IdentifierReference</emu-grammar> or <emu-grammar>MemberExression : MemberExpression `.` PrivateName</emu-grammar>.
+      </li>
+      <li>
+        <p>It is a Syntax Error if the derived |UnaryExpression| is
+          <br>
+          <emu-grammar>PrimaryExpression : CoverParenthesizedExpressionAndArrowParameterList</emu-grammar>
+          <br>
+          and |CoverParenthesizedExpressionAndArrowParameterList| ultimately derives a phrase that, if used in place of |UnaryExpression|, would produce a Syntax Error according to these rules. This rule is recursively applied.</p>
+      </li>
+    </ul>
+    <emu-note>
+      <p>The last rule means that expressions such as `delete (((foo)))` produce early errors because of recursive application of the first rule.</p>
+    </emu-note>
+  </emu-clause>
+</emu-clause>
+
 <emu-clause id="sec-reference-specification-type">
   <h1>The Reference Specification Type</h1>
   <emu-note>
@@ -81,7 +109,7 @@
 
   <!-- es6num="6.2.3.2" -->
   <emu-clause id="sec-putvalue" aoid="PutValue">
-    <h1>PutValue (_V_, _W_)</h1>
+    <h1>PutValue ( _V_, _W_ )</h1>
     <emu-alg>
       1. ReturnIfAbrupt(_V_).
       1. ReturnIfAbrupt(_W_).
@@ -112,7 +140,7 @@
 </emu-clause>
 
 <emu-clause id="sec-getprivate" aoid="GetPrivate">
-  <h1>GetPrivate (_O_, _slotKey_)</h1>
+  <h1>GetPrivate ( _O_, _slotKey_ )</h1>
   <emu-alg>
     1. Assert: Type(_O_) is Object.
     1. If _O_ does not have an internal slot named _slotKey_, throw a TypeError exception.
@@ -121,7 +149,7 @@
 </emu-clause>
 
 <emu-clause id="sec-getprivate" aoid="GetPrivate">
-  <h1>SetPrivate (_O_, _slotKey_, _value_)</h1>
+  <h1>SetPrivate ( _O_, _slotKey_, _value_ )</h1>
   <emu-alg>
     1. Assert: Type(_O_) is Object.
     1. If _O_ does not have an internal slot named _slotKey_, throw a TypeError exception.
