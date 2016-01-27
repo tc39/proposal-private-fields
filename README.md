@@ -2,7 +2,7 @@
 
 ### A Brief Introduction
 
-Private slots are represented as an identifier prefixed with the `#` character.  Private slot keys are lexically confined to their containing class body and are not reified.  In the following example, `#x` and `#y` are private slots whose type is guaranteed to be **Number**.
+Private field names are represented as an identifier prefixed with the `#` character.  Private field definitions create immutable bindings which are lexically confined to their containing class body and are not reified.  In the following example, `#x` and `#y` are private slots whose type is guaranteed to be **Number**.
 
 ```js
 class Point {
