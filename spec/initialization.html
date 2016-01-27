@@ -53,7 +53,7 @@
   <emu-alg>
     1. If _internalSlotsList_ was not provided, let _internalSlotsList_ be an empty List.
     1. Let _obj_ be a newly created object.
-    1. Perform ! AddInternalSlots(_internalSlotsList_).
+    1. <ins>Perform ! AddInternalSlots(_internalSlotsList_).</ins>
     1. Set _obj_'s essential internal methods to the default ordinary object definitions specified in <emu-xref href="#sec-ordinary-object-internal-methods-and-internal-slots"></emu-xref>.
     1. Set the [[Prototype]] internal slot of _obj_ to _proto_.
     1. Set the [[Extensible]] internal slot of _obj_ to *true*.
@@ -73,15 +73,15 @@
     1. Let _callerContext_ be the running execution context.
     1. Let _kind_ be _F_'s [[ConstructorKind]] internal slot.
     1. If _kind_ is `"base"`, then
-      1. Let _internalSlots_ be ! GetInternalSlotsFromConstructor(_F_).
-      1. Let _thisArgument_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%ObjectPrototype%"`, _internalSlots_).
+      1. <ins>Let _internalSlots_ be ! GetInternalSlotsFromConstructor(_F_).</ins>
+      1. <ins>Let _thisArgument_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%ObjectPrototype%"`, _internalSlots_).</ins>
     1. Let _calleeContext_ be PrepareForOrdinaryCall(_F_, _newTarget_).
     1. Assert: _calleeContext_ is now the running execution context.
     1. If _kind_ is `"base"`, then
-      1. Let _result_ be InitializeInstanceSlots(_result_, _F_).
-      1. If _result_ is an abrupt completion, then
-        1. Remove _calleeContext_ from the execution context stack and restore _callerContext_ as the running execution context.
-        1. Return Completion(_result_).
+      1. <ins>Let _result_ be InitializeInstanceSlots(_result_, _F_).</ins>
+      1. <ins>If _result_ is an abrupt completion, then</ins>
+        1. <ins>Remove _calleeContext_ from the execution context stack and restore _callerContext_ as the running execution context.</ins>
+        1. <ins>Return Completion(_result_).</ins>
       1. Perform ! OrdinaryCallBindThis(_F_, _calleeContext_, _thisArgument_).
     1. Let _constructorEnv_ be the LexicalEnvironment of _calleeContext_.
     1. Let _envRec_ be _constructorEnv_'s EnvironmentRecord.
@@ -117,9 +117,9 @@
       1. Let _argList_ be ArgumentListEvaluation of |Arguments|.
       1. ReturnIfAbrupt(_argList_).
       1. Let _result_ be ? Construct(_superConstructor_, _argList_, _newTarget_).
-      1. Let _internalSlots_ be ? GetInternalSlotsFromConstructor(_F_).
-      1. Perform ! AddInternalSlots(_result_, _internalSlots_).
-      1. Perform ? InitializeInstanceSlots(_result_, _F_).
+      1. <ins>Let _internalSlots_ be ? GetInternalSlotsFromConstructor(_F_).</ins>
+      1. <ins>Perform ! AddInternalSlots(_result_, _internalSlots_).</ins>
+      1. <ins>Perform ? InitializeInstanceSlots(_result_, _F_).</ins>
       1. Return ? _thisER_.BindThisValue(_result_).
     </emu-alg>
 

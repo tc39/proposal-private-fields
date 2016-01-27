@@ -28,6 +28,61 @@
   </emu-alg>
 </emu-clause>
 
+<emu-clause id="sec-private-names-bound-names">
+  <h1>Static Semantics: BoundNames</h1>
+
+  <emu-grammar>
+    PrivateFieldDefinition : PrivateName Initializer? `;`
+  </emu-grammar>
+  <emu-alg>
+    1. Return a new List containing the StringValue of |PrivateName|.
+  </emu-alg>
+
+  <emu-grammar>
+    ClassElement : MethodDefinition
+
+    ClassElement : `static` MethodDefinition
+
+    ClassElement : `;`
+  </emu-grammar>
+  <emu-alg>
+    1. Return a new empty List.
+  </emu-alg>
+
+  <emu-grammar>
+    ClassElement : PrivateFieldDefinition
+  </emu-grammar>
+  <emu-alg>
+    1. Return BoundNames of |PrivateFieldDefinition|.
+  </emu-alg>
+
+  <emu-grammar>
+    ClassElementList : ClassElement
+  </emu-grammar>
+  <emu-alg>
+    1. Return BoundNames of |ClassElement|.
+  </emu-alg>
+
+  <emu-grammar>
+    ClassElementList : ClassElementList ClassElement
+  </emu-grammar>
+  <emu-alg>
+    1. Let _names_ be BoundNames of |ClassElementList|.
+    1. Append to _names_ the elements of BoundNames of |ClassElement|.
+    1. Return _names_.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-private-field-definition-early-errors">
+  <h1>Static Semantics: Eary Errors</h1>
+  <emu-grammar>
+    ClassBody : ClassElementList
+  </emu-grammar>
+  <emu-alg>
+    1. It is a SyntaxError if BoundNames of |ClassElementList| contains any duplicate entries.
+  </emu-alg>
+</emu-clause>
+
 <!-- TODO Other static rules which might be needed for class evaluation: IsStatic, PropName -->
 
 <!-- TODO Modify NonConstructorMethodDefinitions so that it doesn't include private field definitions -->
@@ -120,12 +175,12 @@
       1. If _status_ is an abrupt completion, then
         1. Set the running execution context's LexicalEnvironment to _lex_.
         1. Return Completion(_status_).
-    1. If |ClassBody_opt| is not present, let _fields_ be a new empty List.
-    1. Else, let _fields_ be PrivateFieldDefinitions of |ClassBody|.
-    1. Let _slotDefinitions_ be the value of _F_'s [[InstanceSlots]] internal slot.
-    1. For each |ClassElement| _f_ in order from _fields_,
-      1. Let _slotDefinition_ be the result of performing PrivateFieldDefinitionEvaluation for _f_.
-      1. Append _slotDefinition_ to _slotDefinitions_.
+    1. <ins>If |ClassBody_opt| is not present, let _fields_ be a new empty List.</ins>
+    1. <ins>Else, let _fields_ be PrivateFieldDefinitions of |ClassBody|.</ins>
+    1. <ins>Let _slotDefinitions_ be the value of _F_'s [[InstanceSlots]] internal slot.</ins>
+    1. <ins>For each |ClassElement| _f_ in order from _fields_,</ins>
+      1. <ins>Let _slotDefinition_ be the result of performing PrivateFieldDefinitionEvaluation for _f_.</ins>
+      1. <ins>Append _slotDefinition_ to _slotDefinitions_.</ins>
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. If _className_ is not *undefined*, then
       1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
