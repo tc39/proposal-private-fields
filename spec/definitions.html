@@ -118,6 +118,7 @@
     1. Let _scope_ be the running execution context's LexicalEnvironment.
     1. Let _scopeEnvRec_ be _scope_'s EnvironmentRecord.
     1. Perform ! _scopeEnvRec_.InitializeBinding(_bindingName_, _slotKey_).
+    1. NOTE: Since _bindingName_ is not a valid IdentifierName _slotKey_ is not visible to user code.
     1. If |Initializer_opt| is present, let _initializer_ be |Initializer_opt|.
     1. Else, let _initializer_ be ~empty~.
     1. Return Record{[[key]]: _slotKey_, [[initializer]]: _initializer_}.
