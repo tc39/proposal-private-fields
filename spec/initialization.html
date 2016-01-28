@@ -14,10 +14,8 @@
   <h1>AddInternalSlots ( _O_, _internalSlotsList_ )</h1>
   <emu-alg>
     1. For each element _slotKey_ in _internalSlotsList_,
-      1. If _O_ has an internal slot named _slotKey_, then
-        1. Set the value of the internal slot named _slotKey_ of _O_ to *undefined*.
-      1. Else,
-        1. Create an internal slot named _slotKey_ of _O_ whose value is *undefined*.
+      1. If _O_ has an internal slot named _slotKey_, throw a TypeError exception.
+      1. Create an internal slot named _slotKey_ of _O_ whose value is *undefined*.
   </emu-alg>
 </emu-clause>
 
