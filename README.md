@@ -55,8 +55,6 @@ Each ECMAScript function object has an internal slot named `[[PrivateFields]]` w
 1. For a base class, after the new object is allocated.
 1. For a derived class, immediately after the super call returns.
 
-There is no facility for deleting entries from private field WeakMaps.
-
 ### Syntax
 
 The lexical grammar is extended with an additional token:
