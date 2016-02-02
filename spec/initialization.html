@@ -1,69 +1,31 @@
-<emu-clause id="sec-getinternalslotslist" aoid="GetInternalSlotsFromConstructor">
-  <h1>GetInternalSlotsFromConstructor ( _constructor_ )</h1>
-  <emu-alg>
-    1. Assert: _constructor_ is an ECMAScript function object.
-    1. Let _slotDefinitions_ be the value of _constructor_'s [[InstanceSlots]] internal slot.
-    1. Let _keys_ be a new empty List.
-    1. For each element _slotDefinition_ of _slotDefinitions_,
-      1. Append _slotDefinition_.[[key]] to _keys_.
-    1. Return _keys_.
-  </emu-alg>
-</emu-clause>
-
-<emu-clause id="sec-addinternalslots" aoid="AddInternalSlots">
-  <h1>AddInternalSlots ( _O_, _internalSlotsList_ )</h1>
-  <emu-alg>
-    1. For each element _slotKey_ in _internalSlotsList_,
-      1. If _O_ has an internal slot named _slotKey_, throw a TypeError exception.
-      1. Create an internal slot named _slotKey_ of _O_ whose value is *undefined*.
-  </emu-alg>
-</emu-clause>
-
-<emu-clause id="sec-intiializeinstanceslots" aoid="InitializeInstanceSlots">
-  <h1>InitializeInstanceSlots ( _O_, _constructor_ )</h1>
+<emu-clause id="sec-intiializeprivatefields" aoid="InitializePrivateFields">
+  <h1>InitializePrivateFields ( _O_, _constructor_ )</h1>
   <emu-alg>
     1. Assert: Type(_O_) is Object.
     1. Assert: _constructor_ is an ECMAScript function object.
     1. Let _lex_ be the Lexical Environment of the running execution context.
     1. Let _initializerScope_ be the value of _constructor_'s [[Environment]] internal slot.
     1. Set the running execution context's LexicalEnvironment to _initializerScope_.
-    1. Let _slotDefinitions_ be the value of _constructor_'s [[InstanceSlots]] internal slot.
-    1. For element element _slotDefinition_ of _slotDefinitions_,
-      1. Let _initializer_ be _slotDefinition_.[[initializer]].
+    1. Let _fieldRecords_ be the value of _constructor_'s [[PrivateFields]] internal slot.
+    1. For element element _field_ of _fieldRecords_,
+      1. If WeakMapHas(_field_.[[map]], _O_) is *true*, throw a TypeError exception.
+      1. Perform ! WeakMapSet(_field_.[[map]], _O_, *undefined*).
+    1. For element element _field_ of _fieldRecords_,
+      1. Let _initializer_ be _field_.[[initializer]].
       1. If _initializer_ is not ~empty~, then
         1. Let _result_ be the result of evaluating _initializer_.
         1. Let _initialValue_ be GetValue(_result_).
         1. If _initialValue_ is an abrupt completion, then
           1. Set the running execution context's LexicalEnvironment to _lex_.
           1. Return Completion(_initialValue_).
-        1. Set the value of the internal slot named _slotDefinition_.[[key]] of _O_ to _initialValue_.[[value]].
+        1. Perform ! WeakMapSet(_field_.[[map]], _O_, _initialValue_.[[value]]).
     1. Set the running execution context's LexicalEnvironment to _lex_.
-    1. Return *undefined*.
-  </emu-alg>
-</emu-clause>
-
-<emu-clause id="sec-objectcreate" aoid="ObjectCreate">
-  <h1>ObjectCreate ( _proto_ [ , _internalSlotsList_ ] )</h1>
-  <emu-note>
-    <p>This algorithm has been updated to call AddInternalSlots with _internalSlotsList_.</p>
-  </emu-note>
-  <p>The abstract operation ObjectCreate with argument _proto_ (an object or null) is used to specify the runtime creation of new ordinary objects. The optional argument _internalSlotsList_ is a List of the names of additional internal slots that must be defined as part of the object. If the list is not provided, an empty List is used. This abstract operation performs the following steps:</p>
-  <emu-alg>
-    1. If _internalSlotsList_ was not provided, let _internalSlotsList_ be an empty List.
-    1. Let _obj_ be a newly created object.
-    1. <ins>Perform ! AddInternalSlots(_internalSlotsList_).</ins>
-    1. Set _obj_'s essential internal methods to the default ordinary object definitions specified in <emu-xref href="#sec-ordinary-object-internal-methods-and-internal-slots"></emu-xref>.
-    1. Set the [[Prototype]] internal slot of _obj_ to _proto_.
-    1. Set the [[Extensible]] internal slot of _obj_ to *true*.
-    1. Return _obj_.
+    1. Return.
   </emu-alg>
 </emu-clause>
 
 <emu-clause id="sec-ecmascript-function-objects-construct-argumentslist-newtarget">
   <h1>[[Construct]] ( _argumentsList_, _newTarget_ )</h1>
-  <emu-note>
-    <p>This algorithm has been updated to get a list of slots names from the [[InstanceSlots]] internal slot of _F_ and pass that list to OrdinaryCreateFromConstructor.  It also uses [[InstanceSlots]] to initialize the new object's internal slots.</p>
-  </emu-note>
   <p>The [[Construct]] internal method for an ECMAScript Function object _F_ is called with parameters _argumentsList_ and _newTarget_. _argumentsList_ is a possibly empty List of ECMAScript language values. The following steps are taken:</p>
   <emu-alg>
     1. Assert: _F_ is an ECMAScript function object.
@@ -71,12 +33,11 @@
     1. Let _callerContext_ be the running execution context.
     1. Let _kind_ be _F_'s [[ConstructorKind]] internal slot.
     1. If _kind_ is `"base"`, then
-      1. <ins>Let _internalSlots_ be ! GetInternalSlotsFromConstructor(_F_).</ins>
-      1. <ins>Let _thisArgument_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%ObjectPrototype%"`, _internalSlots_).</ins>
+      1. Let _thisArgument_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%ObjectPrototype%"`).
     1. Let _calleeContext_ be PrepareForOrdinaryCall(_F_, _newTarget_).
     1. Assert: _calleeContext_ is now the running execution context.
     1. If _kind_ is `"base"`, then
-      1. <ins>Let _result_ be InitializeInstanceSlots(_result_, _F_).</ins>
+      1. <ins>Let _result_ be InitializePrivateFields(_thisArgument_, _F_).</ins>
       1. <ins>If _result_ is an abrupt completion, then</ins>
         1. <ins>Remove _calleeContext_ from the execution context stack and restore _callerContext_ as the running execution context.</ins>
         1. <ins>Return Completion(_result_).</ins>
@@ -100,7 +61,7 @@
   <emu-clause id="sec-super-keyword-runtime-semantics-evaluation">
     <h1>Runtime Semantics: Evaluation</h1>
     <emu-note>
-      <p>This algorithm method has been updated to get [[InstanceSlots]] from the current active function object and use that list to add and initialize the appropriate internal slots to the object returned from the base class constructor.  It also inlines the abstract operation GetSuperConstructor.</p>
+      <p>This algorithm has been modified to inline the abstract operation GetSuperConstructor.</p>
     </emu-note>
     <emu-grammar>SuperCall : `super` Arguments</emu-grammar>
     <emu-alg>
@@ -115,9 +76,7 @@
       1. Let _argList_ be ArgumentListEvaluation of |Arguments|.
       1. ReturnIfAbrupt(_argList_).
       1. Let _result_ be ? Construct(_superConstructor_, _argList_, _newTarget_).
-      1. <ins>Let _internalSlots_ be ? GetInternalSlotsFromConstructor(_F_).</ins>
-      1. <ins>Perform ! AddInternalSlots(_result_, _internalSlots_).</ins>
-      1. <ins>Perform ? InitializeInstanceSlots(_result_, _F_).</ins>
+      1. <ins>Perform ? InitializePrivateFields(_result_, _F_).</ins>
       1. Return ? _thisER_.BindThisValue(_result_).
     </emu-alg>
 

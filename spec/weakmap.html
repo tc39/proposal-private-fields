@@ -1,0 +1,73 @@
+<emu-clause id="sec-weakmap.prototype.has">
+  <h1>WeakMap.prototype.has ( _key_ )</h1>
+  <p>The following steps are taken:</p>
+  <emu-alg>
+    1. Let _M_ be the *this* value.
+    1. If Type(_M_) is not Object, throw a *TypeError* exception.
+    1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
+    1. <ins>Return ! WeakMapHas(_M_, _key_).</ins>
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-weakmap.prototype.get">
+  <h1>WeakMap.prototype.get ( _key_ )</h1>
+  <p>The following steps are taken:</p>
+  <emu-alg>
+    1. Let _M_ be the *this* value.
+    1. If Type(_M_) is not Object, throw a *TypeError* exception.
+    1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
+    1. <ins>Return ! WeakMapGet(_M_, _key_).</ins>
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-weakmap.prototype.set">
+  <h1>WeakMap.prototype.set ( _key_ , _value_ )</h1>
+  <p>The following steps are taken:</p>
+  <emu-alg>
+    1. Let _M_ be the *this* value.
+    1. If Type(_M_) is not Object, throw a *TypeError* exception.
+    1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
+    1. <ins>Perform ! WeakMapSet(_M_, _key_, _value_).</ins>
+    1. Return _M_.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-weakmaphas" aoid="WeakMapHas">
+  <h1>WeakMapHas (_M_, _key_ )</h1>
+  <emu-alg>
+    1. Assert: _M_ is an object with a [[WeakMapData]] internal slot.
+    1. Let _entries_ be the List that is the value of _M_'s [[WeakMapData]] internal slot.
+    1. If Type(_key_) is not Object, return *false*.
+    1. Repeat for each Record {[[key]], [[value]]} _p_ that is an element of _entries_,
+      1. If _p_.[[key]] is not ~empty~ and SameValue(_p_.[[key]], _key_) is *true*, return *true*.
+    1. Return *false*.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-weakmapget" aoid="WeakMapGet">
+  <h1>WeakMapGet (_M_, _key_ )</h1>
+  <emu-alg>
+    1. Assert: _M_ is an object with a [[WeakMapData]] internal slot.
+    1. Let _entries_ be the List that is the value of _M_'s [[WeakMapData]] internal slot.
+    1. If Type(_key_) is not Object, return *undefined*.
+    1. Repeat for each Record {[[key]], [[value]]} _p_ that is an element of _entries_,
+      1. If _p_.[[key]] is not ~empty~ and SameValue(_p_.[[key]], _key_) is *true*, return _p_.[[value]].
+    1. Return *undefined*.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-weakmapset" aoid="WeakMapSet">
+  <h1>WeakMapSet (_M_, _key_, _value_ )</h1>
+  <emu-alg>
+    1. Assert: _M_ is an object with a [[WeakMapData]] internal slot.
+    1. Let _entries_ be the List that is the value of _M_'s [[WeakMapData]] internal slot.
+    1. If Type(_key_) is not Object, throw a *TypeError* exception.
+    1. Repeat for each Record {[[key]], [[value]]} _p_ that is an element of _entries_,
+      1. If _p_.[[key]] is not ~empty~ and SameValue(_p_.[[key]], _key_) is *true*, then
+        1. Set _p_.[[value]] to _value_.
+        1. Return.
+    1. Let _p_ be the Record {[[key]]: _key_, [[value]]: _value_}.
+    1. Append _p_ as the last element of _entries_.
+    1. Return.
+  </emu-alg>
+</emu-clause>

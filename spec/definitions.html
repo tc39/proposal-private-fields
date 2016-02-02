@@ -114,23 +114,22 @@
   <emu-grammar>PrivateFieldDefinition : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar>
   <emu-alg>
     1. Let _bindingName_ be StringValue of |PrivateName|.
-    1. Let _slotKey_ be a new unique internal slot key.
+    1. Let _privateMap_ be ! Construct(%WeakMap%).
     1. Let _scope_ be the running execution context's LexicalEnvironment.
     1. Let _scopeEnvRec_ be _scope_'s EnvironmentRecord.
-    1. Perform ! _scopeEnvRec_.InitializeBinding(_bindingName_, _slotKey_).
-    1. NOTE: Since _bindingName_ is not a valid |Identifier|, _slotKey_ is not visible to user code.
+    1. Perform ! _scopeEnvRec_.InitializeBinding(_bindingName_, _privateMap_).
+    1. NOTE: Since _bindingName_ is not a valid |Identifier|, _privateMap_ is not visible to user code.
     1. If |Initializer_opt| is present, let _initializer_ be |Initializer_opt|.
     1. Else, let _initializer_ be ~empty~.
-    1. Return Record{[[key]]: _slotKey_, [[initializer]]: _initializer_}.
+    1. Return Record{[[map]]: _privateMap_, [[initializer]]: _initializer_}.
   </emu-alg>
 </emu-clause>
+
+<!-- TODO: When we create a new function, we need to initialize the PrivateFields slot to an empty List -->
 
 <emu-clause id="sec-runtime-semantics-classdefinitionevaluation">
   <h1>Runtime Semantics: ClassDefinitionEvaluation</h1>
   <p>With parameter _className_.</p>
-  <emu-note>
-    This algorithm is modified to create bindings in the lexical scope of the class body for each private field name and populate the [[InstanceSlot]] internal slot of the new constructor.
-  </emu-note>
   <emu-grammar>ClassTail : ClassHeritage? `{` ClassBody? `}`</emu-grammar>
   <emu-alg>
     1. Let _lex_ be the LexicalEnvironment of the running execution context.
@@ -187,12 +186,12 @@
       1. If _status_ is an abrupt completion, then
         1. Set the running execution context's LexicalEnvironment to _lex_.
         1. Return Completion(_status_).
-    1. <ins>If |ClassBody_opt| is not present, let _privateFields_ be a new empty List.</ins>
-    1. <ins>Else, let _privateFields_ be PrivateFieldDefinitions of |ClassBody|.</ins>
-    1. <ins>Let _slotDefinitions_ be the value of _F_'s [[InstanceSlots]] internal slot.</ins>
-    1. <ins>For each |ClassElement| _f_ in order from _privateFields_,</ins>
-      1. <ins>Let _slotDef_ be the result of performing PrivateFieldDefinitionEvaluation for _f_.</ins>
-      1. <ins>Append _slotDef_ to _slotDefinitions_.</ins>
+    1. <ins>If |ClassBody_opt| is not present, let _fieldDefinitions_ be a new empty List.</ins>
+    1. <ins>Else, let _fieldDefinitions_ be PrivateFieldDefinitions of |ClassBody|.</ins>
+    1. <ins>Let _privateFields_ be the value of _F_'s [[PrivateFields]] internal slot.</ins>
+    1. <ins>For each |ClassElement| _f_ in order from _fieldDefinitions_,</ins>
+      1. <ins>Let _fieldRecord_ be the result of performing PrivateFieldDefinitionEvaluation for _f_.</ins>
+      1. <ins>Append _fieldRecord_ to _privateFields_.</ins>
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. If _className_ is not *undefined*, then
       1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).

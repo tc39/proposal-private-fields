@@ -44,20 +44,18 @@ class Point {
 
 ### Private State Object Model
 
-#### Private Slots
+#### WeakMaps
 
-In ECMAScript, each object has a collection of properties which are keyed on strings and Symbols.  In addition, each object may have a set of **private slots** which can hold any ECMAScript value. Private slots are added to objects dynamically during object construction. There is no facility for removing private slots from an object.
+Each field definition creates a unique WeakMap object, whose keys are instances of the class which contains the field definition.  Private field WeakMaps cannot be accessed directly by user code.
 
-Unlike normal property access, during private slot access the prototype chain is not traversed and proxies do not trap access.
+#### Constructors and Field Initialization
 
-#### Constructors and Private Slots
+Each ECMAScript function object has an internal slot named `[[PrivateFields]]` which contains a possibly-empty list of WeakMaps and initializer expressions.  When a class definition is evaluated, the `[[PrivateFields]]` list of the newly created constructor is populated with a WeakMap for each private name definition within the class body.  The constructor adds entries to each WeakMap in this list at the following times:
 
-Each ECMAScript function object has an internal slot named `[[InstanceSlots]]` which contains a possibly-empty list of keys which uniquely identify the private slots that should be added to an object during construction.
+1. For a base class, after the new object is allocated.
+1. For a derived class, immediately after the super call returns.
 
-When a class definition is evaluated, the `[[InstanceSlots]]` list of the newly created constructor contains a private slot key for each private name definition within the class body.  The constructor adds these private slots to objects in the following situations:
-
-1. For a base class, when the object is allocated.
-1. For a derived class, when the super call returns.
+There is no facility for deleting entries from private field WeakMaps.
 
 ### Syntax
 
@@ -80,9 +78,9 @@ ClassElement[Yield] :
     PrivateFieldDefinition[?Yield]
 ```
 
-Each private field definition creates a lexical binding from a private name to a unique private slot key.
+Each private field definition creates a lexical binding from a private name to a private field WeakMap.
 
-If an initializer is provided, it is run immediately after the **this** value has been bound to the new object.  In derived classes, this will occur after the super call is evaluated.
+If an initializer is provided, it is run immediately before the **this** value has been bound to the new object.  In derived classes, this will occur after the super call is evaluated.
 
 It is a syntax error if there are any duplicate private field definitions.
 
@@ -94,9 +92,9 @@ MemberExpression[Yield] :
     MemberExpression[?Yield] `.` PrivateName
 ```
 
-When such a reference is evaluated, the private name is lexically resolved to a private slot key.  The slot key is then used to access the correct private slot on the object.
+When such a reference is evaluated, the private name is lexically resolved to a private field WeakMap.  The WeakMap is then used to access the field data associated with the object.
 
-If the object does not contain the referenced private slot, then the prototype chain is not traversed.  Instead, a TypeError is thrown.
+If the WeakMap does not contain an entry for the object a TypeError is thrown.
 
 It is an early error if a member expression contains a private name which cannot be statically resolved.
 
