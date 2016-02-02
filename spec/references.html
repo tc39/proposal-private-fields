@@ -11,9 +11,8 @@
     1. Let _baseReference_ be the result of evaluating |MemberExpression|.
     1. Let _baseValue_ be ? GetValue(_baseReference_).
     1. Let _bv_ be ? RequireObjectCoercible(_baseValue_).
-    1. Let _fieldStringName_ be StringValue of |PrivateName|.
-    1. Let _resolvedMap_ be ? ResolveBinding(_fieldStringName_).
-    1. Return a value of type Reference whose base value is _bv_ and whose referenced name is _resolvedMap_, and whose strict reference flag is *true*.
+    1. Let _fieldNameString_ be the StringValue of |PrivateName|.
+    1. Return MakePrivateReference(_bv_, _fieldNameString_).
   </emu-alg>
 </emu-clause>
 
@@ -74,13 +73,10 @@
 <emu-clause id="sec-reference-specification-type">
   <h1>The Reference Specification Type</h1>
   <emu-note>
-    <p>This section has been modified to support Private References.  A Private Reference is a Reference whose <i>referenced name</i> component is a WeakMap object.</p>
-  </emu-note>
-  <emu-note>
     <p>The Reference type is used to explain the behaviour of such operators as `delete`, `typeof`, the assignment operators, the `super` keyword and other language features. For example, the left-hand operand of an assignment is expected to produce a reference.</p>
   </emu-note>
-  <p>A <dfn>Reference</dfn> is a resolved name or property binding. A Reference consists of three components, the <em>base</em> value, the <em>referenced name</em> and the Boolean valued <em>strict reference</em> flag. The <em>base</em> value is either *undefined*, an Object, a Boolean, a String, a Symbol, a Number, or an Environment Record (<emu-xref href="#sec-environment-records"></emu-xref>). A _base_ value of *undefined* indicates that the Reference could not be resolved to a binding. The <em>referenced name</em> is a String value, a Symbol value, <ins>or a WeakMap object</ins>.</p>
-  <p>A Super Reference is a Reference that is used to represents a name binding that was expressed using the super keyword. A Super Reference has an additional _thisValue_ component and its _base_ value will never be an Environment Record.</p>
+  <p>A <dfn>Reference</dfn> is a resolved name or property binding. A Reference consists of <ins>four</ins> components, the <em>base</em> value, the <em>referenced name</em>, the Boolean valued <em>strict reference</em> flag, <ins>and the Boolean valued <em>private reference</em> flag</ins>. The <em>base</em> value is either *undefined*, an Object, a Boolean, a String, a Symbol, a Number, or an Environment Record (<emu-xref href="#sec-environment-records"></emu-xref>). A _base_ value of *undefined* indicates that the Reference could not be resolved to a binding. The <em>referenced name</em> is a String value or a Symbol value.</p>
+  <p>A Super Reference is a Reference that is used to represent a name binding that was expressed using the super keyword. A Super Reference has an additional _thisValue_ component and its _base_ value will never be an Environment Record.</p>
   <p>The following abstract operations are used in this specification to access the components of references:</p>
   <ul>
     <li>
@@ -105,7 +101,7 @@
       IsSuperReference(V). Returns *true* if this reference has a _thisValue_ component.
     </li>
     <li>
-      <ins>IsPrivateReference(V). Returns *true* if the <i>referenced name</i> component is a WeakMap object.</ins>
+      <ins>IsPrivateReference(V). Returns the <i>private reference</i> flag component of the reference V.</ins>
     </li>
   </ul>
   <p>The following abstract operations are used in this specification to operate on references:</p>
@@ -123,7 +119,8 @@
           1. Assert: In this case, _base_ will never be *null* or *undefined*.
           1. Let _base_ be ToObject(_base_).
         1. <ins>If IsPrivateReference(_V_), then</ins>
-          1. <ins>Let _privateMap_ be GetReferencedName(_V_).</ins>
+          1. <ins>Let _privateMap_ be ? ResolveBinding(GetReferencedName(_V_)).</ins>
+          1. <ins>Assert: _privateMap_ is a WeakMap object.</ins>
           1. <ins>If WeakMapHas(_privateMap_, _base_) is *false*, throw a TypeError exception.</ins>
           1. <ins>Return ! WeakMapGet(_privateMap_, _base_).</ins>
         1. Return ? _base_.[[Get]](GetReferencedName(_V_), GetThisValue(_V_)).
@@ -153,7 +150,8 @@
           1. Assert: In this case, _base_ will never be *null* or *undefined*.
           1. Set _base_ to ToObject(_base_).
         1. <ins>If IsPrivateReference(_V_), then</ins>
-          1. <ins>Let _privateMap_ be GetReferencedName(_V_).</ins>
+          1. <ins>Let _privateMap_ be ? ResolveBinding(GetReferencedName(_V_)).</ins>
+          1. <ins>Assert: _privateMap_ is a WeakMap object.</ins>
           1. <ins>If WeakMapHas(_privateMap_, _base_) is *false*, throw a TypeError exception.</ins>
           1. <ins>Perform ! WeakMapSet(_privateMap_, _base_, _W_).</ins>
         1. Else,
@@ -166,6 +164,25 @@
     <emu-note>
       <p>The object that may be created in step 6.a.ii is not accessible outside of the above algorithm and the ordinary object [[Set]] internal method. An implementation might choose to avoid the actual creation of that object.</p>
     </emu-note>
+  </emu-clause>
+
+  <!--
+  1. Replace all occurances of "Return a value of type Reference..." with calls to MakeReference
+  2. Rename MakeSuperPropertyReference to MakeSuperReference for consistency.
+
+  <emu-clause id="sec-makereference" aoid="MakeReference">
+    <h1>MakeReference ( _baseValue_, _referencedName_, _strict_ )</h1>
+    <emu-alg>
+      1. Return a value of type Reference whose base value is _baseValue_, whose referenced name is _referencedName_, whose strict reference flag is _strict_, and whose private reference component is *false*.
+    </emu-alg>
+  </emu-clause>
+  -->
+
+  <emu-clause id="sec-makeprivatereference" aoid="MakePrivateReference">
+    <h1>MakePrivateReference ( _baseValue_, _fieldName_ )</h1>
+    <emu-alg>
+      1. Return a value of type Reference whose base value is _baseValue_, whose referenced name is _fieldName_, whose strict reference flag is *true*, and whose private reference component is *true*.
+    </emu-alg>
   </emu-clause>
 
 </emu-clause>
