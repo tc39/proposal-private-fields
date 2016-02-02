@@ -43,6 +43,32 @@
       <p>The last rule means that expressions such as `delete (((foo)))` produce early errors because of recursive application of the first rule.</p>
     </emu-note>
   </emu-clause>
+
+  <emu-clause id="sec-delete-operator-runtime-semantics-evaluation">
+    <h1>Runtime Semantics: Evaluation</h1>
+    <emu-grammar>UnaryExpression : `delete` UnaryExpression</emu-grammar>
+    <emu-alg>
+      1. Let _ref_ be the result of evaluating |UnaryExpression|.
+      1. ReturnIfAbrupt(_ref_).
+      1. If Type(_ref_) is not Reference, return *true*.
+      1. If IsUnresolvableReference(_ref_) is *true*, then
+        1. Assert: IsStrictReference(_ref_) is *false*.
+        1. Return *true*.
+      1. If IsPropertyReference(_ref_) is *true*, then
+        1. <ins>Assert: IsPrivateReference(_ref_) is *false*.</ins>
+        1. If IsSuperReference(_ref_), throw a *ReferenceError* exception.
+        1. Let _baseObj_ be ! ToObject(GetBase(_ref_)).
+        1. Let _deleteStatus_ be ? _baseObj_.[[Delete]](GetReferencedName(_ref_)).
+        1. If _deleteStatus_ is *false* and IsStrictReference(_ref_) is *true*, throw a *TypeError* exception.
+        1. Return _deleteStatus_.
+      1. Else _ref_ is a Reference to an Environment Record binding,
+        1. Let _bindings_ be GetBase(_ref_).
+        1. Return ? _bindings_.DeleteBinding(GetReferencedName(_ref_)).
+    </emu-alg>
+    <emu-note>
+      <p>When a `delete` operator occurs within strict mode code, a *SyntaxError* exception is thrown if its |UnaryExpression| is a direct reference to a variable, function argument, or function name. In addition, if a `delete` operator occurs within strict mode code and the property to be deleted has the attribute { [[Configurable]]: *false* }, a *TypeError* exception is thrown.</p>
+    </emu-note>
+  </emu-clause>
 </emu-clause>
 
 <emu-clause id="sec-reference-specification-type">
