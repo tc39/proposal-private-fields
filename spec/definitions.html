@@ -127,6 +127,23 @@
 
 <!-- TODO: When we create a new function, we need to initialize the PrivateFields slot to an empty List -->
 
+<!-- TODO:
+
+- Replace NonConstructorMethodDefinitions with NonConstructorClassElements
+- How do we switch based on type?  Should we introduce a new polymorphic operation?
+  (ClassElementDefinitionEvaluation) Or just use PropertyDefinitionEvaluation?
+
+Types:
+
+- private field definition
+- private static field definition
+- public field definition
+- public static field definition
+- method definition
+- static method definition
+
+--->
+
 <emu-clause id="sec-runtime-semantics-classdefinitionevaluation">
   <h1>Runtime Semantics: ClassDefinitionEvaluation</h1>
   <p>With parameter _className_.</p>
