@@ -2,6 +2,9 @@
 <emu-grammar>
   MemberExpression[Yield] :
     MemberExpression[?Yield] `.` PrivateName
+
+  PrimaryExpression[Yield] :
+    PrivateName
 </emu-grammar>
 
 <emu-clause id="sec-private-references-runtime-semantics-evaluation">
@@ -14,15 +17,7 @@
     1. Let _fieldNameString_ be the StringValue of |PrivateName|.
     1. Return MakePrivateReference(_bv_, _fieldNameString_).
   </emu-alg>
-</emu-clause>
 
-<emu-grammar>
-  PrimaryExpression[Yield] :
-    PrivateName
-</emu-grammar>
-
-<emu-clause id="sec-private-references-shorthand-runtime-semantics-evaluation">
-  <h1>Runtime Semantics: Evaluation</h1>
   <emu-grammar>PrimaryExpression : PrivateName</emu-grammar>
   <emu-alg>
     1. Let _baseValue_ be ? ResolveThisBinding().
