@@ -91,6 +91,13 @@
   <emu-alg>
     1. It is a SyntaxError if BoundNames of |ClassElementList| contains any duplicate entries.
   </emu-alg>
+
+  <emu-grammar>
+    PrivateFieldDefinition : PrivateName Initializer? `;`
+  </emu-grammar>
+  <emu-alg>
+    1. It is a SyntaxError if |Initializer| contains |NewTarget|.
+  </emu-alg>
 </emu-clause>
 
 <!-- TODO Other static rules which might be needed for class evaluation: IsStatic, PropName -->
