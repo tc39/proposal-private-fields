@@ -1,5 +1,4 @@
 <h2>Syntax</h2>
-<!-- TODO: Do we want to allow @1, for instance? -->
 <emu-grammar>
   PrivateName ::
     `#` IdentifierPart
@@ -100,9 +99,32 @@
   </emu-alg>
 </emu-clause>
 
-<!-- TODO Other static rules which might be needed for class evaluation: IsStatic, PropName -->
+<emu-clause id="sec-private-field-definition-static-semantics-isstatic">
+  <h1>Static Semantics: IsStatic</h1>
+  <emu-grammar>ClassElement : PrivateFieldDefinition</emu-grammar>
+  <emu-alg>
+    1. Return *false*.
+  </emu-alg>
+</emu-clause>
 
-<!-- TODO Modify NonConstructorMethodDefinitions so that it doesn't include private field definitions -->
+<emu-clause id="sec-private-field-definition-static-semantics-propname">
+  <h1>Static Semantics: PropName</h1>
+  <emu-grammar>ClassElement : PrivateFieldDefinition</emu-grammar>
+  <emu-alg>
+    1. Return ~empty~.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="sec-private-field-definition-static-semantics-nonconstructormethoddefinitions">
+  <h1>Static Semantics: NonConstructorMethodDefinitions</h1>
+  <emu-grammar>ClassElementList : ClassElement</emu-grammar>
+  <emu-alg>
+    1. If |ClassElement| is the production <emu-grammar>ClassElement : `;`</emu-grammar> , return a new empty List.
+    1. <ins>If |ClassElement| is the production <emu-grammar>ClassElement : PrivateFieldDefinition</emu-grammar> , return a new empty List</ins>.
+    1. If IsStatic of |ClassElement| is *false* and PropName of |ClassElement| is `"constructor"`, return a new empty List.
+    1. Return a List containing |ClassElement|.
+  </emu-alg>
+</emu-clause>
 
 <emu-clause id="sec-private-field-definitions">
   <h1>Static Semantics: PrivateFieldDefinitions</h1>
@@ -134,8 +156,6 @@
     1. Return Record{[[map]]: _privateMap_, [[initializer]]: _initializer_}.
   </emu-alg>
 </emu-clause>
-
-<!-- TODO: When we create a new function, we need to initialize the PrivateFields slot to an empty List -->
 
 <!-- TODO:
 
@@ -215,10 +235,12 @@ Types:
         1. Return Completion(_status_).
     1. <ins>If |ClassBody_opt| is not present, let _fieldDefinitions_ be a new empty List.</ins>
     1. <ins>Else, let _fieldDefinitions_ be PrivateFieldDefinitions of |ClassBody|.</ins>
-    1. <ins>Let _privateFields_ be the value of _F_'s [[PrivateFields]] internal slot.</ins>
+    1. <ins>Let _privateFields_ be a new empty List.</ins>
     1. <ins>For each |ClassElement| _f_ in order from _fieldDefinitions_,</ins>
       1. <ins>Let _fieldRecord_ be the result of performing PrivateFieldDefinitionEvaluation for _f_.</ins>
       1. <ins>Append _fieldRecord_ to _privateFields_.</ins>
+    <!-- Is this too late to add a private slot to the class? It could instead be added as an empty list on every function in FunctionAllocate. -->
+    1. Set the value of _F_'s [[PrivateFields]] internal slot to _privateFields_.</ins>
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. If _className_ is not *undefined*, then
       1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
