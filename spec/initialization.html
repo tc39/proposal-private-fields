@@ -10,8 +10,10 @@
     1. Perform ! _initializerER_.BindThisValue(_O_).
     1. Set the running execution context's LexicalEnvironment to _initializerEnv_.
     1. Let _fieldRecords_ be the value of _constructor_'s [[PrivateFields]] internal slot.
-    1. Let _setList_ be an empty List.
     1. For each element _field_ of _fieldRecords_,
+      1. If WeakMapHas(_field_.[[map]], _O_) is *true*, then
+        1. Set the running execution context's LexicalEnvironment to _lex_.
+        1. Throw a *TypeError* exception.
       1. Let _initializer_ be _field_.[[initializer]].
       1. If _initializer_ is not ~empty~, then
         1. Let _result_ be the result of evaluating _initializer_.
@@ -19,12 +21,8 @@
         1. If _initialValue_ is an abrupt completion, then
           1. Set the running execution context's LexicalEnvironment to _lex_.
           1. Return Completion(_initialValue_).
-        1. Append the Record{ [[map]]: _field_.[[map]], [[value]]: _initialValue_.[[Value]] } to _setList_.
+        1. Perform ! WeakMapSet(_field_.[[map]], _O_, _initialValue_.[[value]]).
     1. Set the running execution context's LexicalEnvironment to _lex_.
-    1. For each element _set_ of _setList_,
-      1. If WeakMapHas(_set_.[[map]], _O_) is *true*, then
-        1. Throw a *TypeError* exception.
-      1. Perform ! WeakMapSet(_set_.[[map]], _O_, _set_.[[value]]).
     1. Return.
   </emu-alg>
 </emu-clause>
