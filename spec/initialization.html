@@ -5,7 +5,10 @@
     1. Assert: _constructor_ is an ECMAScript function object.
     1. Let _lex_ be the Lexical Environment of the running execution context.
     1. Let _initializerEnv_ be ! NewFunctionEnvironment(_constructor_, *undefined*).
-    1. NOTE: the `new.target` is inaccessible from the _initializerEnv_ through an <a href="#sec-private-field-definition-early-errors">early error</a>.
+    1. NOTE: the `new.target` is inaccessible from the _initializerEnv_ through an <a href="#sec-private-field-definition-early-errors">early error</a> except through `eval`.
+    1. Perform ! _envRec_.CreateImmutableBinding(`"arguments"`, ~false~).
+    1. Perform ! _envRec_.InitializeBinding(`"arguments"`, ~undefined~).
+    1. NOTE: `arguments` is inaccessible from the _initializerEnv_ through an <a href="#sec-private-field-definition-early-errors">early error</a> except through `eval`.
     1. Let _initializerER_ be the value of _initializerEnv_'s EnvironmentRecord.
     1. Perform ! _initializerER_.BindThisValue(_O_).
     1. Set the running execution context's LexicalEnvironment to _initializerEnv_.
