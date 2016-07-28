@@ -82,24 +82,6 @@
   </emu-alg>
 </emu-clause>
 
-<emu-clause id="sec-private-field-definition-early-errors">
-  <h1>Static Semantics: Early Errors</h1>
-  <emu-grammar>
-    ClassBody : ClassElementList
-  </emu-grammar>
-  <emu-alg>
-    1. It is a SyntaxError if BoundNames of |ClassElementList| contains any duplicate entries.
-  </emu-alg>
-
-  <emu-grammar>
-    PrivateFieldDefinition : PrivateName Initializer? `;`
-  </emu-grammar>
-  <emu-alg>
-    1. It is a SyntaxError if |Initializer| contains |NewTarget|.
-    1. It is a SyntaxError if |Initializer| contains an |Identifier| with the StringValue `"arguments"`.
-  </emu-alg>
-</emu-clause>
-
 <emu-clause id="sec-private-field-definition-static-semantics-isstatic">
   <h1>Static Semantics: IsStatic</h1>
   <emu-grammar>ClassElement : PrivateFieldDefinition</emu-grammar>
@@ -144,6 +126,7 @@
 
 <emu-clause id="sec-instance-slot-definition">
   <h1>Runtime Semantics: PrivateFieldDefinitionEvaluation</h1>
+  <p>With parameter _homeObject_.</p>
   <emu-grammar>PrivateFieldDefinition : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar>
   <emu-alg>
     1. Let _bindingName_ be StringValue of |PrivateName|.
@@ -152,9 +135,26 @@
     1. Let _scopeEnvRec_ be _scope_'s EnvironmentRecord.
     1. Perform ! _scopeEnvRec_.InitializeBinding(_bindingName_, _privateMap_).
     1. NOTE: Since _bindingName_ is not a valid |Identifier|, _privateMap_ is not visible to user code.
-    1. If |Initializer_opt| is present, let _initializer_ be |Initializer_opt|.
+    1. If |Initializer_opt| is present,
+      1. Let _lex_ be the Lexical Environment of the running execution context.
+      1. Let _initializer_ be FunctionCreate(~Method~, ~empty~, |Initializer_opt|, _lex_, *true*).
+      1. Perform MakeMethod(_initializer_, _homeObject_);
     1. Else, let _initializer_ be ~empty~.
     1. Return Record{[[map]]: _privateMap_, [[initializer]]: _initializer_}.
+  </emu-alg>
+</emu-clause>
+
+<emu-clause id="runtime-semantics-class-public-field-definition-evaluation">
+  <h1>Runtime Semantics: EvaluateBody</h1>
+
+  <p>With parameter _functionObject_.</p>
+
+  <emu-grammar>
+    Initializer[In, Yield] :
+      `=` AssignmentExpression[?In, ?Yield]
+  </emu-grammar>
+  <emu-alg>
+    1. Return the result of evaluating |AssignmentExpression|.
   </emu-alg>
 </emu-clause>
 
@@ -238,7 +238,7 @@ Types:
     1. <ins>Else, let _fieldDefinitions_ be PrivateFieldDefinitions of |ClassBody|.</ins>
     1. <ins>Let _privateFields_ be a new empty List.</ins>
     1. <ins>For each |ClassElement| _f_ in order from _fieldDefinitions_,</ins>
-      1. <ins>Let _fieldRecord_ be the result of performing PrivateFieldDefinitionEvaluation for _f_.</ins>
+      1. <ins>Let _fieldRecord_ be the result of performing PrivateFieldDefinitionEvaluation for _f_ with argument _proto_.</ins>
       1. <ins>Append _fieldRecord_ to _privateFields_.</ins>
     <!-- Is this too late to add a private slot to the class? It could instead be added as an empty list on every function in FunctionAllocate. -->
     1. Set the value of _F_'s [[PrivateFields]] internal slot to _privateFields_.</ins>
