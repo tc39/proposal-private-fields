@@ -67,7 +67,7 @@ export class PrivateStateField {
   }
   add(reciever, object) {
     new #klass(receiver);
-    Private.set(receiver, object);
+    this.set(receiver, object);
   }
 }
 ```
@@ -92,7 +92,7 @@ let x = new Superclass(1);
 class EvilSubclass extends Superclass {
   static getFoo(receiver) { return receiver.#foo; }
 }
-console.log(EvilSubclass.getFoo(x);
+console.log(EvilSubclass.getFoo(x));
 ```
 
 So, since protected state doesn't actually enforce privacy, the main thing we are getting out of protected state is that *access is obscured*--you have to go through some steps (e.g., being in a subclass, or building that workaround) to get at the data.
