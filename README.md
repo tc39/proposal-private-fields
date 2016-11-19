@@ -100,5 +100,30 @@ It is an early error if a member expression contains a private name which cannot
 
 ### Frequently Asked Questions ###
 
-- [Why do we have to use a special character in front of the identifier?](https://github.com/zenparsing/es-private-fields/issues/14)
-- [Why not use a private version of Symbols?](https://github.com/zenparsing/es-abstract-refs/issues/11)
+**Q**: Why do we have to use a special character in front of the identifier?
+
+**A**: In short, this seems to be the only way that the system can reliably enforce who has access to the private state in a world with fully dynamic type checking and eval. See [this answer](https://github.com/tc39/proposal-private-fields/issues/14#issuecomment-153050837) for a more detailed explanation of options.
+
+**Q**: Why not use a private version of symbols?
+
+**A**: Private symbols were found to not interact well with membranes used to support certain security paradigms. See [this comment](https://github.com/zenparsing/es-abstract-refs/issues/11#issuecomment-65723350) for details.
+
+**Q**: Why aren't private methods in this proposal?
+
+**A**: This proposal attempts to be minimal, but compatible with a follow-on private methods proposal. See [METHODS.md](https://github.com/tc39/proposal-private-fields/blob/master/METHODS.md) for details.
+
+**Q**: How does private state interact with decorators?
+
+**A**: Private field declarations should be analogous to class property declarations in how they work with decorators. See [DECORATORS.md](https://github.com/tc39/proposal-private-fields/blob/master/DECORATORS.md) for a strawman.
+
+**Q**: Should classes be able to have private fields?
+
+**A**: Also a good possible follow-on proposal;, see [STATIC.md](https://github.com/tc39/proposal-private-fields/blob/master/STATIC.md) for details.
+
+**Q**: Can we use `@` rather than `#` for the sigil, like Ruby?
+
+**A**: TC39 considered this question in the September 2016 TC39 meeting and decided to stick with `@` being proposed for decorators for now. One factor in the decision was the ecosystem of users in transpilation who are using `@` for decorators already.
+
+**Q**: Can we reconsider, in the syntax, the decision to do...
+
+**A**: Yes, it's not too late. Two active discussions on syntax are [whether the declaration should have the word `private` in it](https://github.com/tc39/proposal-private-fields/issues/53) and [what the token should be for initializing a field](https://github.com/tc39/proposal-class-public-fields/issues/33). However, there are other decisions, such as the need for a sigil, and the inability to use `@` for the sigil, that are set for particular strong reasons described above.
