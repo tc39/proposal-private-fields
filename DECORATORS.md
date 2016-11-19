@@ -164,3 +164,66 @@ function indexable(descriptor) {
   return [descriptor, getterSetterDescriptor];
 }
 ```
+
+
+### Protected-style inheritance of private state via decorators
+
+But what if you want to do more, and really get something that looks like protected state, with its inheritance chain and everything? Here's an example of usage:
+
+```js
+class Example {
+  @protected
+  #foo;
+  constructor(foo) { #foo = foo; }
+}
+class Subclass extends Example {
+  printFoo() { console.log(this.protected.foo); }
+  setFoo(value) { this.protected.foo = value; }
+}
+let x = new Subclass(1);
+x.printFoo();  // => 1
+x.setFoo(2);
+x.printFoo();  // => 2
+```
+
+How could that work? Well, the catch here is that `this.protected` is just as available outside of the class (but, this doesn't have any real implications for privacy, as discussed in the sidebar at the beginning of the document). `protected` could be implemented as follows (untested, and a strawman, so slow in many ways!):
+
+```js
+// Maps names to an Array of PrivateStateFields with that name
+let protectedFields = new Map();
+
+function findProtected(object, property) {
+  for (let key in protectedFields.get(property)) {
+    try {
+      key.get(object);
+      return key;
+    } catch (e) {
+      continue;
+    }
+  }
+  throw new TypeError();
+}
+
+export function protected(descriptor) {
+  let name = descriptor.name.slice(1);
+  if (!protectedFields.has(name)) { protectedFields.set(name, []) }
+  protectedFields.get(name).push(descriptor.key);
+  return [descriptor];
+}
+
+Object.defineProperty(Object.prototype, 'protected', { get() {
+  let object = this;
+  return new Proxy({}, {
+    get(target, property, receiver) {
+      return findProtected(object, property).get(object);
+    }
+    set(target, property, value, receiver) {
+      return findProtected(object, property).set(object, value);
+    }
+  });
+} });
+```
+
+It would be a little more complicated for methods (`getProtected` would have to return bound methods based on the underlying one, so that we get the receiver right) but should be possible in a similar way.
+
+I suspect that a decorator like `@hidden` or `@indexed` is what most use cases would need, rather than this, however.
