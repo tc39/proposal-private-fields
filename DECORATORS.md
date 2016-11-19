@@ -103,26 +103,64 @@ There are lots of ways that an 'escape hatch' for private state could be exposed
 
 ```js
 class Example {
-  @protected
+  @hidden
   #foo;
   constructor(foo) { #foo = foo; }
 }
 let x = new Example(1);
-console.log(Example.getProtectedFoo(x)); // => 1
+console.log(Example.getHiddenFoo(x)); // => 1
 ```
 
 This could be implemented by the following decorator:
 
 ```js
-function protected(descriptor) {
+function hidden(descriptor) {
   let getterDescriptor = {
     type: 'method',
     isStatic: true,
-    key: 'getProtected' + descriptor.name[1].toUpperCase() + descriptor.name.slice(2),
+    key: 'getHidden' + descriptor.name[1].toUpperCase() + descriptor.name.slice(2),
     value(receiver) {
       return descritor.key.get(receiver);
     }
   };
   return [descriptor, getterDescriptor];
+}
+```
+
+### TypeScript-style escape hatch--just use square brackets
+
+In TypeScript, if something is marked `private`, you can get around that by using indexing with square brackets, rather than `.`. We could expose something similar using decorators. Example code:
+
+```js
+class Example {
+  @indexable
+  #foo;
+  constructor(foo) { #foo = foo; }
+}
+class Subclass extends Example {
+  printFoo() { console.log(this['#foo']); }
+  setFoo(value) { this['#foo'] = value; }
+}
+let x = new Subclass(1);
+x.printFoo();  // => 1
+x.setFoo(2);
+x.printFoo();  // => 2
+```
+
+The indexing is available to subclasses and outside of the class. Here's an implementation:
+
+```js
+function indexable(descriptor) {
+  let getterSetterDescriptor = {
+    type: 'accessor',
+    key: descriptor.name,
+    get(receiver) {
+      return descritor.key.get(receiver);
+    },
+    set(receiver, value) {
+      return descritor.key.set(receiver, value);
+    }
+  };
+  return [descriptor, getterSetterDescriptor];
 }
 ```
