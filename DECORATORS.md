@@ -1,4 +1,4 @@
-The purpose of this document is to outline a possible path for further evolution of the private state proposal. The idea is to make sure that this proposal is consistent with the described evolution path, but to keep these additional features for follow-on proposals.
+The purpose of this document is to outline a possible path for further evolution of the private state proposal. The idea is to make sure that this proposal is consistent with the described evolution path, but to keep these additional features for follow-on proposals. This proposal does not change the semantics of any working code from the main proposal in this repository
 
 ## Strawman interaction between private fields and decorators
 
