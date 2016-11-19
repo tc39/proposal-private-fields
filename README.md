@@ -11,19 +11,19 @@ class Point {
     #y;
 
     constructor(x = 0, y = 0) {
-        this.#x = +x;
-        this.#y = +y;
+        #x = +x;
+        #y = +y;
     }
 
-    get x() { return this.#x }
-    set x(value) { this.#x = +value }
+    get x() { return #x }
+    set x(value) { #x = +value }
 
-    get y() { return this.#y }
-    set y(value) { this.#y = +value }
+    get y() { return #y }
+    set y(value) { #y = +value }
 
-    equals(p) { return this.#x === p.#x && this.#y === p.#y }
+    equals(p) { return #x === p.#x && #y === p.#y }
 
-    toString() { return `Point<${ this.#x },${ this.#y }>` }
+    toString() { return `Point<${ #x },${ #y }>` }
 
 }
 ```
@@ -36,8 +36,8 @@ class Point {
     #y = 0;
 
     constructor() {
-        this.#x; // 0
-        this.#y; // 0
+        #x; // 0
+        #y; // 0
     }
 }
 ```
@@ -89,6 +89,8 @@ MemberExpression[Yield] :
     ...
     MemberExpression[?Yield] `.` PrivateName
 ```
+
+A concise member expression syntax also exists, where `#x` is shorthand for `this.#x`.
 
 When such a reference is evaluated, the private name is lexically resolved to a private field WeakMap.  The WeakMap is then used to access the field data associated with the object.
 
