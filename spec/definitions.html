@@ -130,17 +130,17 @@
   <emu-grammar>PrivateFieldDefinition : PrivateName Initializer[In, ?Yield]? `;`</emu-grammar>
   <emu-alg>
     1. Let _bindingName_ be StringValue of |PrivateName|.
-    1. Let _privateMap_ be ! Construct(%WeakMap%).
+    1. Let _field_ be NewPrivateField();
     1. Let _scope_ be the running execution context's LexicalEnvironment.
     1. Let _scopeEnvRec_ be _scope_'s EnvironmentRecord.
-    1. Perform ! _scopeEnvRec_.InitializeBinding(_bindingName_, _privateMap_).
-    1. NOTE: Since _bindingName_ is not a valid |Identifier|, _privateMap_ is not visible to user code.
+    1. Perform ! _scopeEnvRec_.InitializeBinding(_bindingName_, _field_).
+    1. NOTE: Since _bindingName_ is not a valid |Identifier|, _field_ is not visible to user code.
     1. If |Initializer_opt| is present,
       1. Let _lex_ be the Lexical Environment of the running execution context.
       1. Let _initializer_ be FunctionCreate(~Method~, ~empty~, |Initializer_opt|, _lex_, *true*).
       1. Perform MakeMethod(_initializer_, _homeObject_);
     1. Else, let _initializer_ be ~empty~.
-    1. Return Record{[[map]]: _privateMap_, [[initializer]]: _initializer_}.
+    1. Return Record{[[field]]: _field_, [[initializer]]: _initializer_}.
   </emu-alg>
 </emu-clause>
 

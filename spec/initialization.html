@@ -4,16 +4,13 @@
     1. Assert: Type(_O_) is Object.
     1. Assert: _constructor_ is an ECMAScript function object.
     1. Let _fieldRecords_ be the value of _constructor_'s [[PrivateFields]] internal slot.
-    1. For each element _field_ of _fieldRecords_,
-      1. Let _initializer_ be _field_.[[initializer]].
+    1. For each element _fieldRecord_ of _fieldRecords_,
+      1. Let _initializer_ be _fieldRecord_.[[initializer]].
       1. If _initializer_ is not ~empty~, then
         1. Let _initValue_ be ? Call(_initializer_, _O_).
       1. Else,
         1. Let _initialValue_ be *undefined*
-      1. If WeakMapHas(_field_.[[map]], _O_) is *true*, then
-        1. Set the running execution context's LexicalEnvironment to _lex_.
-        1. Throw a *TypeError* exception.
-      1. Perform ! WeakMapSet(_field_.[[map]], _O_, _initialValue_).
+      1. Perform ? PrivateStateAdd(_fieldRecord_.[[field]], _O_, _initialValue_).
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. Return.
   </emu-alg>
