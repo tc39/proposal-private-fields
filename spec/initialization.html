@@ -3,7 +3,7 @@
   <emu-alg>
     1. Assert: Type(_O_) is Object.
     1. Assert: _constructor_ is an ECMAScript function object.
-    1. Let _fieldRecords_ be the value of _constructor_'s [[PrivateFields]] internal slot.
+    1. Let _fieldRecords_ be the value of _constructor_'s [[PrivateFieldDefinitions]] internal slot.
     1. For each element _fieldRecord_ of _fieldRecords_,
       1. Let _initializer_ be _fieldRecord_.[[initializer]].
       1. If _initializer_ is not ~empty~, then

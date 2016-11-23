@@ -131,7 +131,7 @@
           1. Let _base_ be ToObject(_base_).
         1. <ins>If IsPrivateReference(_V_), then</ins>
           1. <ins>Let _field_ be ? ResolveBinding(GetReferencedName(_V_)).</ins>
-          1. <ins>Assert: _field_ is a Private Field object.</ins>
+          1. <ins>Assert: _field_ is a Private Field Identifier.</ins>
           1. <ins>Return ? PrivateFieldGet(_field_, _base_).</ins>
         1. Return ? _base_.[[Get]](GetReferencedName(_V_), GetThisValue(_V_)).
       1. Else _base_ must be an Environment Record,
@@ -161,7 +161,7 @@
           1. Set _base_ to ToObject(_base_).
         1. <ins>If IsPrivateReference(_V_), then</ins>
           1. <ins>Let _field_ be ? ResolveBinding(GetReferencedName(_V_)).</ins>
-          1. <ins>Assert: _field_ is a Private Field object.</ins>
+          1. <ins>Assert: _field_ is a Private Field Identifier.</ins>
           1. <ins>Perform ? PrivateFieldSet(_field_, _base_, _W_).</ins>
         1. Else,
           1. Let _succeeded_ be ? _base_.[[Set]](GetReferencedName(_V_), _W_, GetThisValue(_V_)).
