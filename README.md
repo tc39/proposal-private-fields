@@ -44,13 +44,13 @@ class Point {
 
 ### Private State Object Model
 
-#### WeakMaps
+#### Private Field Identiers
 
-Each field definition creates a unique WeakMap object, whose keys are instances of the class which contains the field definition.  Private field WeakMaps cannot be accessed directly by user code.
+Each field definition effectively creates a unique internal slot identifer. In the specification mechanics, this is based on a Private Field Identifier value, not accessible to user code, which is associated through an internal slot in the object with a value. The system can be thought of as equivalent to WeakMaps, with the only difference being the (implied) garbage collection semantics--the value for the private field is held alive by the object, even if nothing else points to the Private Field Identifier.
 
 #### Constructors and Field Initialization
 
-Each ECMAScript function object has an internal slot named `[[PrivateFields]]` which contains a possibly-empty list of WeakMaps and initializer expressions.  When a class definition is evaluated, the `[[PrivateFields]]` list of the newly created constructor is populated with a WeakMap for each private name definition within the class body.  The constructor adds entries to each WeakMap in this list at the following times:
+Each ECMAScript function object has an internal slot named `[[PrivateFieldDefinitions]]` which contains a possibly-empty list of Private Field Identifiers and initializer expressions.  When a class definition is evaluated, the `[[PrivateFieldDefinitions]]` list of the newly created constructor is populated with a Private Field Identifier for each private name definition within the class body.  The constructor adds entries to each object's internal slots, associating the Private Field Identifier to the appropriate value, in this list at the following times:
 
 1. For a base class, after the new object is allocated.
 1. For a derived class, immediately after the super call returns.
