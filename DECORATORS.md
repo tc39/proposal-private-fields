@@ -16,23 +16,23 @@ Extrapolating from [the current decorator proposal](https://github.com/tc39/prop
 
 The question for private state is, what do those descriptors look like for syntactic private field declarations? And, symmetrically, how can can other decorators create new private fields as part of their expansion?
 
-### `PrivateStateField`
+### `PrivateFieldIdentifier`
 
-The proposal here is to make a new class, `PrivateStateField`, which reifies a private state field across various instances. In the concept, `PrivateStateField` is identical to [`WeakMap`](https://tc39.github.io/ecma262/#sec-weakmap-objects), differing critically in garbage collection:
+The proposal here is to make a new class, `PrivateFieldIdentifier`, which reifies a private state field across various instances. In the concept, `PrivateFieldIdentifier` is identical to [`WeakMap`](https://tc39.github.io/ecma262/#sec-weakmap-objects), differing critically in garbage collection:
 
-Semantically, the instances of objects in which `PrivateStateField` has been added as a member "have a reference to" the `PrivateStateField` object. That is, unlike with `WeakMaps`, if nobody explicitly references the `PrivateStateField`, but the `PrivateStateField` has an entry where an object is a key, and that object is still alive, then the value corresponding to the object key is still alive. Or, stated in the terms of the spec mechanics, `PrivateStateField` has a \[\[PrivateID]], and adding an object to a `PrivateStateField` adds an entry in that objects \[\[PrivateFields]] record mapping the \[\[PrivateID]] to the provided value.
+Semantically, the instances of objects in which `PrivateFieldIdentifier` has been added as a member "have a reference to" the `PrivateFieldIdentifier` object. That is, unlike with `WeakMaps`, if nobody explicitly references the `PrivateFieldIdentifier`, but the `PrivateFieldIdentifier` has an entry where an object is a key, and that object is still alive, then the value corresponding to the object key is still alive. Or, stated in the terms of the spec mechanics, `PrivateFieldIdentifier` has a \[\[PrivateID]], and adding an object to a `PrivateFieldIdentifier` adds an entry in that objects \[\[PrivateFields]] record mapping the \[\[PrivateID]] to the provided value.
 
-`PrivateStateField.prototype` has three methods: `add(object, value)` (which throws if the field exists), `set(object, value)` (which throws if the field does not exist), and `get(object)` (which throws if the field does not exist). These correspond to the operations in private state of adding a field, getting a field and setting a field. The constructor returns a new PrivateStateField, taking a single optional argument, like `Symbol`, which is just used for printing purposes.
+`PrivateFieldIdentifier.prototype` has three methods: `add(object, value)` (which throws if the field exists), `set(object, value)` (which throws if the field does not exist), and `get(object)` (which throws if the field does not exist). These correspond to the operations in private state of adding a field, getting a field and setting a field. The constructor returns a new PrivateFieldIdentifier, taking a single optional argument, like `Symbol`, which is just used for printing purposes.
 
 ### Decorator reification of private state
 
-With first-class `PrivateStateField`, decorators on private state can be represented analogously to decorators on public property declarations. The above code sample may result in a descriptor such as the following being passed to the `decorator` function:
+With first-class `PrivateFieldIdentifier`, decorators on private state can be represented analogously to decorators on public property declarations. The above code sample may result in a descriptor such as the following being passed to the `decorator` function:
 
 ```js
 {
   type: 'privateField',
   name: '#bar',
-  key: new PrivateStateField('#bar');
+  key: new PrivateFieldIdentifier('#bar');
   initializer: () => baz,
 }
 ```
@@ -41,14 +41,14 @@ Decorators may accept these as arguments, or generate them as entries in the arr
 
 ### Polyfill and implementation notes
 
-Including `PrivateStateField` as a built-in in the standard library actually doesn't add any expressive power at all. It can already be implemented with the proposal out for review using the super return trick.
+Including `PrivateFieldIdentifier` as a built-in in the standard library actually doesn't add any expressive power at all. It can already be implemented with the proposal out for review using the super return trick.
 
 ```js
 class SuperClass {
   constructor(receiver) { return receiver; }
 }
 
-export class PrivateStateField {
+export class PrivateFieldIdentifier {
   // klasses have been appointed to lead OO design in the transition team
   #klass = class extends SuperClass {
     #member;
@@ -72,7 +72,7 @@ export class PrivateStateField {
 }
 ```
 
-Some JavaScript implementations already have features which are analogous to `PrivateStateField`. V8 has "private symbols" which are not passed to Proxies, don't go up prototype chains in their lookup, and which can be defined on any object (including a Proxy). For V8, PrivateStateField can be easily implemented by simply giving it a private field which is a private symbol, where the `get`, `set` and `add` methods simply perform property access with this private symbol.
+Some JavaScript implementations already have features which are analogous to `PrivateFieldIdentifier`. V8 has "private symbols" which are not passed to Proxies, don't go up prototype chains in their lookup, and which can be defined on any object (including a Proxy). For V8, PrivateFieldIdentifier can be easily implemented by simply giving it a private field which is a private symbol, where the `get`, `set` and `add` methods simply perform property access with this private symbol.
 
 ## 'Protected'-style state through decorators on private state
 
@@ -189,7 +189,7 @@ x.printFoo();  // => 2
 How could that work? Well, the catch here is that `this.protected` is just as available outside of the class (but, this doesn't have any real implications for privacy, as discussed in the sidebar at the beginning of the document). `protected` could be implemented as follows (untested, and a strawman, so slow in many ways!):
 
 ```js
-// Maps names to an Array of PrivateStateFields with that name
+// Maps names to an Array of PrivateFieldIdentifiers with that name
 let protectedFields = new Map();
 
 function findProtected(object, property) {
