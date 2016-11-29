@@ -195,3 +195,261 @@
   </emu-clause>
 
 </emu-clause>
+
+<emu-clause id="sec-ban-private-state-outside-classes">
+  <h1>Disallowing Private State references outside of classes</h1>
+  Private state references only have a reasonable meaning inside a methods or field initializer of a class. This section patches the ECMAScript specification to disallow those references with early errors.
+
+  <emu-clause id="sec-performeval-rules-outside-methods">
+    <h1>Additional Early Error Rules for Eval Outside Methods <ins>and Initializers</ins></h1>
+    <p>These static semantics are applied by PerformEval when a direct eval call occurs outside of a method <ins>when it is a location which is also outside of a public or private field initializer</ins>.</p>
+    <emu-grammar>ScriptBody : StatementList</emu-grammar>
+    <ul>
+      <li>It is a Syntax Error if |StatementList| Contains `super`.</li>
+      <li><ins>It is a Syntax Error if |StatementList| Contains |PrivateName|.</ins></li>
+    </ul>
+  </emu-clause>
+
+    <emu-clause id="sec-function-definitions-static-semantics-early-errors">
+      <h1>Static Semantics: Early Errors</h1>
+      <emu-grammar>
+        FunctionDeclaration : `function` BindingIdentifier `(` FormalParameters `)` `{` FunctionBody `}`
+
+        FunctionDeclaration : `function` `(` FormalParameters `)` `{` FunctionBody `}`
+
+        FunctionExpression : `function` BindingIdentifier? `(` FormalParameters `)` `{` FunctionBody `}`
+      </emu-grammar>
+      <ul>
+        <li>
+          If the source code matching this production is strict mode code, the Early Error rules for <emu-grammar>UniqueFormalParameters : FormalParameters</emu-grammar> are applied.
+        </li>
+        <li>
+          If the source code matching this production is strict mode code, it is a Syntax Error if |BindingIdentifier| is the |IdentifierName| `eval` or the |IdentifierName| `arguments`.
+        </li>
+        <li>
+          It is a Syntax Error if ContainsUseStrict of |FunctionBody| is *true* and IsSimpleParameterList of |FormalParameters| is *false*.
+        </li>
+        <li>
+          It is a Syntax Error if any element of the BoundNames of |FormalParameters| also occurs in the LexicallyDeclaredNames of |FunctionBody|.
+        </li>
+        <li>
+          It is a Syntax Error if |FormalParameters| Contains |SuperProperty| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if |FunctionBody| Contains |SuperProperty| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if |FormalParameters| Contains |SuperCall| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if |FunctionBody| Contains |SuperCall| is *true*.
+        </li>
+        <li><ins>
+          It is a Syntax Error if |FormalParameters| Contains |PrivateName| is *true*.
+        </ins></li>
+        <li><ins>
+          It is a Syntax Error if |FunctionBody| Contains |PrivateName| is *true*.
+        </ins></li>
+      </ul>
+      <emu-note>
+        <p>The LexicallyDeclaredNames of a |FunctionBody| does not include identifiers bound using var or function declarations.</p>
+      </emu-note>
+      <emu-grammar>UniqueFormalParameters : FormalParameters</emu-grammar>
+      <ul>
+        <li>
+          It is a Syntax Error if BoundNames of |FormalParameters| contains any duplicate elements.
+        </li>
+      </ul>
+      <emu-grammar>FormalParameters : FormalParameterList</emu-grammar>
+      <ul>
+        <li>
+          It is a Syntax Error if IsSimpleParameterList of |FormalParameterList| is *false* and BoundNames of |FormalParameterList| contains any duplicate elements.
+        </li>
+      </ul>
+      <emu-note>
+        <p>Multiple occurrences of the same |BindingIdentifier| in a |FormalParameterList| is only allowed for functions and generator functions which have simple parameter lists and which are not defined in strict mode code.</p>
+      </emu-note>
+      <emu-grammar>FunctionBody : FunctionStatementList</emu-grammar>
+      <ul>
+        <li>
+          It is a Syntax Error if the LexicallyDeclaredNames of |FunctionStatementList| contains any duplicate entries.
+        </li>
+        <li>
+          It is a Syntax Error if any element of the LexicallyDeclaredNames of |FunctionStatementList| also occurs in the VarDeclaredNames of |FunctionStatementList|.
+        </li>
+        <li>
+          It is a Syntax Error if ContainsDuplicateLabels of |FunctionStatementList| with argument &laquo; &raquo; is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if ContainsUndefinedBreakTarget of |FunctionStatementList| with argument &laquo; &raquo; is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if ContainsUndefinedContinueTarget of |FunctionStatementList| with arguments &laquo; &raquo; and &laquo; &raquo; is *true*.
+        </li>
+      </ul>
+    </emu-clause>
+
+    <emu-clause id="sec-generator-function-definitions-static-semantics-early-errors">
+      <h1>Static Semantics: Early Errors</h1>
+      <emu-grammar>GeneratorMethod : `*` PropertyName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
+      <ul>
+        <li>
+          It is a Syntax Error if HasDirectSuper of |GeneratorMethod| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if |UniqueFormalParameters| Contains |YieldExpression| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if ContainsUseStrict of |GeneratorBody| is *true* and IsSimpleParameterList of |UniqueFormalParameters| is *false*.
+        </li>
+        <li>
+          It is a Syntax Error if any element of the BoundNames of |UniqueFormalParameters| also occurs in the LexicallyDeclaredNames of |GeneratorBody|.
+        </li>
+      </ul>
+      <emu-grammar>
+        GeneratorDeclaration : `function` `*` BindingIdentifier `(` FormalParameters `)` `{` GeneratorBody `}`
+
+        GeneratorDeclaration : `function` `*` `(` FormalParameters `)` `{` GeneratorBody `}`
+
+        GeneratorExpression : `function` `*` BindingIdentifier? `(` FormalParameters `)` `{` GeneratorBody `}`
+      </emu-grammar>
+      <ul>
+        <li>
+          If the source code matching this production is strict mode code, the Early Error rules for <emu-grammar>UniqueFormalParameters : FormalParameters</emu-grammar> are applied.
+        </li>
+        <li>
+          If the source code matching this production is strict mode code, it is a Syntax Error if |BindingIdentifier| is the |IdentifierName| `eval` or the |IdentifierName| `arguments`.
+        </li>
+        <li>
+          It is a Syntax Error if ContainsUseStrict of |GeneratorBody| is *true* and IsSimpleParameterList of |FormalParameters| is *false*.
+        </li>
+        <li>
+          It is a Syntax Error if any element of the BoundNames of |FormalParameters| also occurs in the LexicallyDeclaredNames of |GeneratorBody|.
+        </li>
+        <li>
+          It is a Syntax Error if |FormalParameters| Contains |YieldExpression| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if |FormalParameters| Contains |SuperProperty| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if |GeneratorBody| Contains |SuperProperty| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if |FormalParameters| Contains |SuperCall| is *true*.
+        </li>
+        <li>
+          It is a Syntax Error if |GeneratorBody| Contains |SuperCall| is *true*.
+        </li>
+        <li>
+          <ins>It is a Syntax Error if |FormalParameters| Contains |PrivateName| is *true*.</ins>
+        </li>
+        <li>
+          <ins>It is a Syntax Error if |GeneratorBody| Contains |PrivateName| is *true*.</ins>
+        </li>
+      </ul>
+    </emu-clause>
+
+    <emu-clause id="sec-async-function-definitions-static-semantics-early-errors">
+      <h1>Static Semantics: Early Errors</h1>
+      <emu-grammar>
+        AsyncMethod : `async` [no LineTerminator here] PropertyName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+      </emu-grammar>
+      <ul>
+        <li>It is a Syntax Error if ContainsUseStrict of |AsyncFunctionBody| is *true* and IsSimpleParameterList of |UniqueFormalParameters| is *false*.</li>
+        <li>It is a Syntax Error if HasDirectSuper of |AsyncMethod| is *true*.</li>
+        <li>It is a Syntax Error if |UniqueFormalParameters| Contains |AwaitExpression| is *true*.</li>
+        <li>It is a Syntax Error if any element of the BoundNames of |UniqueFormalParameters| also occurs in the LexicallyDeclaredNames of |AsyncFunctionBody|.</li>
+      </ul>
+      <emu-grammar>
+        AsyncFunctionDeclaration : `async` [no LineTerminator here] `function` BindingIdentifier `(` FormalParameters `)` `{` AsyncFunctionBody `}`
+
+        AsyncFunctionDeclaration : `async` [no LineTerminator here] `function` `(` FormalParameters `)` `{` AsyncFunctionBody `}`
+
+        AsyncFunctionExpression : `async` [no LineTerminator here] `function` `(` FormalParameters `)` `{` AsyncFunctionBody `}` 
+
+        AsyncFunctionExpression : `async` [no LineTerminator here] `function` BindingIdentifier `(` FormalParameters `)` `{` AsyncFunctionBody `}`
+      </emu-grammar>
+      <ul>
+        <li>It is a Syntax Error if ContainsUseStrict of |AsyncFunctionBody| is *true* and IsSimpleParameterList of |FormalParameters| is *false*.</li>
+        <li>It is a Syntax Error if |FormalParameters| Contains |AwaitExpression| is *true*.</li>
+        <li>If the source code matching this production is strict code, the Early Error rules for <emu-grammar>UniqueFormalParameters : FormalParameters</emu-grammar> are applied.</li>
+        <li>If the source code matching this production is strict code, it is a Syntax Error if |BindingIdentifier| is the |IdentifierName| `eval` or the |IdentifierName| `arguments`.</li>
+        <li>It is a Syntax Error if any element of the BoundNames of |FormalParameters| also occurs in the LexicallyDeclaredNames of |AsyncFunctionBody|.</li>
+        <li>It is a Syntax Error if |FormalParameters| Contains |SuperProperty| is *true*.</li>
+        <li>It is a Syntax Error if |AsyncFunctionBody| Contains |SuperProperty| is *true*.</li>
+        <li>It is a Syntax Error if |FormalParameters| Contains |SuperCall| is *true*.</li>
+        <li>It is a Syntax Error if |AsyncFunctionBody| Contains |SuperCall| is *true*.</li>
+        <li><ins>It is a Syntax Error if |FormalParameters| Contains |PrivateName| is *true*.</ins></li>
+        <li><ins>It is a Syntax Error if |AsyncFunctionBody| Contains |PrivateName| is *true*.</ins></li>
+      </ul>
+    </emu-clause>
+        <emu-clause id="sec-createdynamicfunction" aoid="CreateDynamicFunction">
+          <h1>Runtime Semantics: CreateDynamicFunction(_constructor_, _newTarget_, _kind_, _args_)</h1>
+          <p>The abstract operation CreateDynamicFunction is called with arguments _constructor_, _newTarget_, _kind_, and _args_. _constructor_ is the constructor function that is performing this action, _newTarget_ is the constructor that `new` was initially applied to, _kind_ is either `"normal"`, `"generator"`, or `"async"`, and _args_ is a List containing the actual argument values that were passed to _constructor_. The following steps are taken:</p>
+          <emu-alg>
+            1. If _newTarget_ is *undefined*, let _newTarget_ be _constructor_.
+            1. If _kind_ is `"normal"`, then
+              1. Let _goal_ be the grammar symbol |FunctionBody[~Yield, ~Await]|.
+              1. Let _parameterGoal_ be the grammar symbol |FormalParameters[~Yield, ~Await]|.
+              1. Let _fallbackProto_ be `"%FunctionPrototype%"`.
+            1. Else if _kind_ is `"generator"`, then
+              1. Let _goal_ be the grammar symbol |GeneratorBody|.
+              1. Let _parameterGoal_ be the grammar symbol |FormalParameters[+Yield, ~Await]|.
+              1. Let _fallbackProto_ be `"%Generator%"`.
+            1. Else,
+              1. Assert: _kind_ is `"async"`.
+              1. Let _goal_ be the grammar symbol |AsyncFunctionBody|.
+              1. Let _parameterGoal_ be the grammar symbol |FormalParameters[~Yield, +Await]|.
+              1. Let _fallbackProto_ be `"%AsyncFunctionPrototype%"`.
+            1. Let _argCount_ be the number of elements in _args_.
+            1. Let _P_ be the empty String.
+            1. If _argCount_ = 0, let _bodyText_ be the empty String.
+            1. Else if _argCount_ = 1, let _bodyText_ be _args_[0].
+            1. Else _argCount_ &gt; 1,
+              1. Let _firstArg_ be _args_[0].
+              1. Let _P_ be ? ToString(_firstArg_).
+              1. Let _k_ be 1.
+              1. Repeat, while _k_ &lt; _argCount_-1
+                1. Let _nextArg_ be _args_[_k_].
+                1. Let _nextArgString_ be ? ToString(_nextArg_).
+                1. Let _P_ be the result of concatenating the previous value of _P_, the String `","` (a comma), and _nextArgString_.
+                1. Increase _k_ by 1.
+              1. Let _bodyText_ be _args_[_k_].
+            1. Let _bodyText_ be ? ToString(_bodyText_).
+            1. Let _parameters_ be the result of parsing _P_, interpreted as UTF-16 encoded Unicode text as described in <emu-xref href="#sec-ecmascript-language-types-string-type"></emu-xref>, using _parameterGoal_ as the goal symbol. Throw a *SyntaxError* exception if the parse fails.
+            1. Let _body_ be the result of parsing _bodyText_, interpreted as UTF-16 encoded Unicode text as described in <emu-xref href="#sec-ecmascript-language-types-string-type"></emu-xref>, using _goal_ as the goal symbol. Throw a *SyntaxError* exception if the parse fails.
+            1. If _bodyText_ is strict mode code, then let _strict_ be *true*, else let _strict_ be *false*.
+            1. If any static semantics errors are detected for _parameters_ or _body_, throw a *SyntaxError* or a *ReferenceError* exception, depending on the type of the error. If _strict_ is *true*, the Early Error rules for <emu-grammar>UniqueFormalParameters : FormalParameters</emu-grammar> are applied. Parsing and early error detection may be interweaved in an implementation dependent manner.
+            1. If ContainsUseStrict of _body_ is *true* and IsSimpleParameterList of _parameters_ is *false*, throw a *SyntaxError* exception.
+            1. If any element of the BoundNames of _parameters_ also occurs in the LexicallyDeclaredNames of _body_, throw a *SyntaxError* exception.
+            1. If _body_ Contains |SuperCall| is *true*, throw a *SyntaxError* exception.
+            1. If _parameters_ Contains |SuperCall| is *true*, throw a *SyntaxError* exception.
+            1. If _body_ Contains |SuperProperty| is *true*, throw a *SyntaxError* exception.
+            1. If _parameters_ Contains |SuperProperty| is *true*, throw a *SyntaxError* exception.
+            1. <ins>If _body_ Contains |PrivateName| is *true*, throw a *SyntaxError* exception.</ins>
+            1. <ins>If _parameters_ Contains |PrivateName| is *true*, throw a *SyntaxError* exception.</ins>
+            1. If _kind_ is `"generator"`, then
+              1. If _parameters_ Contains |YieldExpression| is *true*, throw a *SyntaxError* exception.
+            1. If _kind_ is `"async"`, then
+              1. If _parameters_ Contains |AwaitExpression| is *true*, throw a *SyntaxError* exception.
+            1. If _strict_ is *true*, then
+              1. If BoundNames of _parameters_ contains any duplicate elements, throw a *SyntaxError* exception.
+            1. Let _proto_ be ? GetPrototypeFromConstructor(_newTarget_, _fallbackProto_).
+            1. Let _F_ be FunctionAllocate(_proto_, _strict_, _kind_).
+            1. Let _realmF_ be _F_.[[Realm]].
+            1. Let _scope_ be _realmF_.[[GlobalEnv]].
+            1. Perform FunctionInitialize(_F_, ~Normal~, _parameters_, _body_, _scope_).
+            1. If _kind_ is `"generator"`, then
+              1. Let _prototype_ be ObjectCreate(%GeneratorPrototype%).
+              1. Perform DefinePropertyOrThrow(_F_, `"prototype"`, PropertyDescriptor{[[Value]]: _prototype_, [[Writable]]: *true*, [[Enumerable]]: *false*, [[Configurable]]: *false*}).
+            1. Else, perform MakeConstructor(_F_).
+            1. NOTE: Async functions are not constructable and do not have a prototype property.
+            1. Perform SetFunctionName(_F_, `"anonymous"`).
+            1. Return _F_.
+          </emu-alg>
+          <emu-note>
+            <p>A `prototype` property is automatically created for every function created using CreateDynamicFunction, to provide for the possibility that the function will be used as a constructor.</p>
+          </emu-note>
+        </emu-clause>
+</emu-clause>
