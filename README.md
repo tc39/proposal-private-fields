@@ -127,3 +127,7 @@ It is an early error if a member expression contains a private name which cannot
 **Q**: Can we reconsider, in the syntax, the decision to do...
 
 **A**: Yes, it's not too late. Two active discussions on syntax are [whether the declaration should have the word `private` in it](https://github.com/tc39/proposal-private-fields/issues/53) and [what the token should be for initializing a field](https://github.com/tc39/proposal-class-public-fields/issues/33). However, there are other decisions, such as the need for a sigil, and the inability to use `@` for the sigil, that are set for particular strong reasons described above.
+
+**Q**: I have another question about the design of the proposal.
+
+**A**: Check [here](https://github.com/tc39/proposal-private-fields/blob/master/FAQ.md).
