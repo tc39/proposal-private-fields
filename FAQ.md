@@ -90,7 +90,7 @@ Doing so would violate encapsulation (see below). That other languages allow it 
 
 ## What do you mean by "encapsulation" / "hard private"?
 
-It means that private fields are *purely* internal: no JS code outside of a class can detect or affect the existance, name, or value of any private field of instances of said class without directly inspecting the class's source, unless the class chooses to reveal them. (This includes subclasses and superclasses.)
+It means that private fields are *purely* internal: no JS code outside of a class can detect or affect the existence, name, or value of any private field of instances of said class without directly inspecting the class's source, unless the class chooses to reveal them. (This includes subclasses and superclasses.)
 
 This means that reflection methods like [getOwnPropertySymbols](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertySymbols) must not reveal private fields.
 
