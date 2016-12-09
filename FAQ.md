@@ -1,6 +1,6 @@
 ## Why aren't declarations `private x`?
 
-This sort of declaration is what other languages use (notably Java), and implies that access would be done with `this.x`. Assuming that isn't the case (see below), in JavaScript this would silenty create or access a public field, rather than throwing an error. This is a major potential source of bugs or invisibly making public fields which were intended to be private.
+This sort of declaration is what other languages use (notably Java), and implies that access would be done with `this.x`. Assuming that isn't the case (see below), in JavaScript this would silently create or access a public field, rather than throwing an error. This is a major potential source of bugs or invisibly making public fields which were intended to be private.
 
 ## Why isn't access `this.x`?
 
