@@ -108,7 +108,7 @@ This also means that if a class has a private field named `x`, code outside the 
 
 1. "Hidden" but not encapsulated properties are likewise already possible through the use of Symbols as property names (see below).
 
-Consensus in the committee is that we'd like a more ergonomic way to provide true encapsulation. As such, this proposal is currently moving forward with hard-private fields, letting [decorators](https://github.com/tc39/proposal-private-fields/blob/master/DECORATORS.md) or other mechanisms provide classes an opt-in escape hatch. There's still some debate about whether an escape hatch should exist by default, with some means to opt-out.
+This proposal is currently moving forward with hard-private fields, letting [decorators](https://github.com/tc39/proposal-private-fields/blob/master/DECORATORS.md) or other mechanisms provide classes an opt-in escape hatch. We intend to gather feedback during this process to help determine whether this is the correct semantics.
 
 See [this issue](https://github.com/tc39/proposal-private-fields/issues/33) for more.
 
