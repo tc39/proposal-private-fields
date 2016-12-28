@@ -1,8 +1,7 @@
 <h2>Syntax</h2>
 <emu-grammar>
   PrivateName ::
-    `#` IdentifierPart
-    PrivateName IdentifierPart
+    `#` IdentifierName
 
   ClassElement[Yield] :
     MethodDefinition[?Yield]
@@ -12,9 +11,6 @@
 
   PrivateFieldDefinition[Yield] :
     PrivateName Initializer[In, ?Yield]? `;`
-
-  PrimaryExpression[Yield]:
-    PrivateName
 </emu-grammar>
 
 <emu-clause id="sec-private-names-static-semantics-stringvalue">
@@ -22,8 +18,7 @@
   <emu-see-also-para op="StringValue"></emu-see-also-para>
   <emu-grammar>
     PrivateName ::
-      `#` IdentifierPart
-      PrivateName IdentifierPart
+      `#` IdentifierName
   </emu-grammar>
   <emu-alg>
     1. Return the String value consisting of the sequence of code units corresponding to |PrivateName|. In determining the sequence any occurrences of `\\` |UnicodeEscapeSequence| are first replaced with the code point represented by the |UnicodeEscapeSequence| and then the code points of the entire |PrivateName| are converted to code units by UTF16Encoding (<emu-xref href="#sec-utf16encoding"></emu-xref>) each code point.
