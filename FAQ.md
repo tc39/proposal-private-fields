@@ -4,9 +4,27 @@ This sort of declaration is what other languages use (notably Java), and implies
 
 ## Why isn't access `this.x`?
 
-Having a private field named `x` must not prevent there from being a public field named `x` (see "encapsulation" below), so accessing a private field can't just be a normal lookup.
+Having a private field named `x` must not prevent there from being a public field named `x`, so accessing a private field can't just be a normal lookup.
 
 Less significantly, this would also break an invariant of current syntax: `this.x` and `this['x']` are currently always semantically identical.
+
+### Why does this proposal allow a class to have a private field `#x` *and* a public field `x`?
+
+1. If private fields conflicted with public fields, it would break encapsulation; see below.
+
+1. One of the more important properties of private fields is that subclasses don't need to know about them. We'd like to allow a subclass to define a property named `x` even if its superclass has a private field of that name.
+
+This is something other languages with private fields generally allow. E.g., the following is perfectly legal Java:
+
+```java
+class Base {
+  private int x = 0;
+}
+
+class Derived extends Base {
+  public int x = 0;
+}
+```
 
 ### Why not do a runtime check on the type of the reciever to determine whether to access the private or public field named `x`?
 
@@ -70,20 +88,6 @@ class Point {
 }
 ```
 
-## Why does this proposal allow a class to have a private field and public field of the same name? Don't other languages normally forbid that?
-
-It's required to provide encapsulation given JavaScript's object model (see below). Also, other languages do kind of allow this: e.g. the following is perfectly legal Java:
-
-```java
-class Base {
-	private int x = 0;
-}
-
-class Derived extends Base {
-	public int x = 0;
-}
-```
-
 ## Why doesn't this proposal allow some mechanism for reflecting on / accessing private fields from outside the class which declares them (e.g. for testing)? Don't other languages normally allow that?
 
 Doing so would violate encapsulation (see below). That other languages allow it isn't sufficient reason on its own, especially since in some of them (e.g. C++) this is accomplished by modifying memory directly and is not necessarily a goal.
@@ -98,8 +102,89 @@ This also means that if a class has a private field named `x`, code outside the 
 
 ## Why is encapsulation a goal of this proposal?
 
-1. There are already good ways to provide "hidden" but not encapsulated fields, like Symbols as property names.
-
 1. Library authors have found that their users will start to depend on any exposed part of their interface, even undocumented parts. They do not generally consider themselves free to break their user's pages and applications just because those users were depending upon some part of the library's interface which the library author did not intend them to depend upon. As a consequence, they would like to have hard private state to be able to hide implementation details in a more complete way.
 
+1. While it's already possible to *model* true encapsulation using either per-instance closures or WeakMaps (see below), both approaches are unergonomic to use with classes and have memory usage semantics which may be surprising. Furthermore, per-instance closures don't allow instances of the same class to access each other's private fields (see [above](#why-does-this-proposal-allow-accessing-private-fields-of-other-instances-of-the-same-class-dont-other-languages-normally-forbid-that)), and with WeakMaps there's a non-obvious risk of exposing private data. WeakMaps are also likely to be slower than private fields could be.
+
+1. "Hidden" but not encapsulated properties are likewise already possible through the use of Symbols as property names (see below).
+
+This proposal is currently moving forward with hard-private fields, letting [decorators](https://github.com/tc39/proposal-private-fields/blob/master/DECORATORS.md) or other mechanisms provide classes an opt-in escape hatch. We intend to gather feedback during this process to help determine whether this is the correct semantics.
+
 See [this issue](https://github.com/tc39/proposal-private-fields/issues/33) for more.
+
+### How can you model encapsulation using WeakMaps?
+
+```js
+const Person = (function(){
+  const privates = new WeakMap;
+  let ids = 0;
+  return class Person {
+    constructor(name) {
+      this.name = name;
+      privates.set(this, {id: ids++});
+    }
+    equals(otherPerson) {
+      return privates.get(this).id === privates.get(otherPerson).id;
+    }
+  }
+})();
+let alice = new Person('Alice');
+let bob = new Person('Bob');
+alice.equals(bob); // false
+```
+
+There's a potential pitfall with this approach, though. Suppose we want to add a custom callback to construct greetings:
+
+```js
+const Person = (function(){
+  const privates = new WeakMap;
+  let ids = 0;
+  return class Person {
+    constructor(name, makeGreeting) {
+      this.name = name;
+      privates.set(this, {id: ids++, makeGreeting});
+    }
+    equals(otherPerson) {
+      return privates.get(this).id === privates.get(otherPerson).id;
+    }
+    greet(otherPerson) {
+      return privates.get(this).makeGreeting(otherPerson.name);
+    }
+  }
+})();
+let alice = new Person('Alice', name => `Hello, ${name}!`);
+let bob = new Person('Bob', name => `Hi, ${name}.`);
+alice.equals(bob); // false
+alice.greet(bob); // === 'Hello, Bob!'
+```
+
+At first glance this appears fine, but:
+
+```js
+let mallory = new Person('Mallory', function(name) {this.id = 0; return `o/ ${name}`;});
+mallory.greet(bob); // === 'o/ Bob'
+mallory.equals(alice); // true. Oops!
+```
+
+### How can you provide hidden but not encapsulated properties using Symbols?
+
+```js
+const Person = (function(){
+  const _id = Symbol('id');
+  let ids = 0;
+  return class Person {
+    constructor(name) {
+      this.name = name;
+      this[_id] = ids++;
+    }
+    equals(otherPerson) {
+      return this[_id] === otherPerson[_id];
+    }
+  }
+})();
+let alice = new Person('Alice');
+let bob = new Person('Bob');
+alice.equals(bob); // false
+
+alice[Object.getOwnPropertySymbols(alice)[0]]; // == 0, which is alice's id.
+```
