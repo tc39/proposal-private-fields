@@ -5,12 +5,12 @@
     1. Assert: _constructor_ is an ECMAScript function object.
     1. Let _fieldRecords_ be the value of _constructor_'s [[PrivateFieldDefinitions]] internal slot.
     1. For each element _fieldRecord_ of _fieldRecords_,
-      1. Let _initializer_ be _fieldRecord_.[[initializer]].
+      1. Let _initializer_ be _fieldRecord_.[[PrivateFieldDefinitionInitializer]].
       1. If _initializer_ is not ~empty~, then
         1. Let _initValue_ be ? Call(_initializer_, _O_).
       1. Else,
         1. Let _initialValue_ be *undefined*
-      1. Perform ? PrivateFieldAdd(_fieldRecord_.[[field]], _O_, _initialValue_).
+      1. Perform ? PrivateFieldAdd(_fieldRecord_.[[PrivateFieldDefinitionIdentifier]], _O_, _initialValue_).
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. Return.
   </emu-alg>

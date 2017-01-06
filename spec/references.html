@@ -14,7 +14,7 @@
     1. Let _baseReference_ be the result of evaluating |MemberExpression|.
     1. Let _baseValue_ be ? GetValue(_baseReference_).
     1. Let _bv_ be ? RequireObjectCoercible(_baseValue_).
-    1. Let _fieldNameString_ be the StringValue of |PrivateName|.
+    1. Let _fieldNameString_ be the PrivateStringValue of |PrivateName|.
     1. Return MakePrivateReference(_bv_, _fieldNameString_).
   </emu-alg>
 
@@ -22,7 +22,7 @@
   <emu-alg>
     1. Let _baseValue_ be ? ResolveThisBinding().
     1. Let _bv_ be ? RequireObjectCoercible(_baseValue_).
-    1. Let _fieldNameString_ be the StringValue of |PrivateName|.
+    1. Let _fieldNameString_ be the PrivateStringValue of |PrivateName|.
     1. Return MakePrivateReference(_bv_, _fieldNameString_).
   </emu-alg>
 </emu-clause>
@@ -251,7 +251,7 @@
     <emu-grammar>MemberExpression[Yield] : MemberExpression[?Yield] `.` PrivateName</emu-grammar>
     <emu-grammar> PrimaryExpression[Yield] : PrivateName</emu-grammar>
     <emu-alg>
-      1. If StringValue(|PrivateName|) is in _names_, return *true*.
+      1. If PrivateStringValue of |PrivateName| is in _names_, return *true*.
       1. Return *false*.
     </emu-alg>
 
@@ -272,18 +272,14 @@
       1. Let _names_ be an empty List.
       1. If |Script| is parsed directly from PerformEval,
         1. Let _env_ be the running execution context's PrivateFieldEnvironment.
-        1. While _env_ is not *null*,
-          1. For each binding with the name _N_,
+        1. Repeat while _env_ is not *null*,
+          1. For each binding named _N_ in _env_,
             1. If _names_ does not contain _N_, append _N_ to _names_.
           1. Let _env_ be _env_'s outer environment reference.
       1. If AllPrivateNamesValid of |ScriptBody| with the argument _names_ is *false*, throw a SyntaxError.
     </emu-alg>
     <emu-grammar>Module : ModuleBody?</emu-grammar>
     <ul>
-      <li>It is a Syntax Error if AllPrivateNamesValid of |ModuleBody| with ane empty List as an argument is *false*.</li>
-    </ul>
-    <emu-grammar>Module : ModuleBody?</emu-grammar>
-    <ul>
-      <li>It is a syntax error if AllPrivateNamesValid of |ModuleBody| with ane empty List as an argument is *false*.</li>
+      <li>It is a Syntax Error if AllPrivateNamesValid of <emu-nt>ModuleBody</emu-nt> with ane empty List as an argument is *false*.</li>
     </ul>
 </emu-clause>

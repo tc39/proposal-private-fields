@@ -1,6 +1,6 @@
 <p>The <dfn>Private Field Identifier</dfn> specification type is used to describe a globally unique identifier which represents a private field name. A private field identifier may be installed on any ECMAScript object with the PrivateFieldAdd internal algorithm, and then read or written using PrivateFieldGet and PrivateFieldSet.</p>
 
-<p>All ECMAScript objects have a new additional internal slot, [[PrivateFieldValues]], which is a List of Records of the form { [[field]]: Private Field Identifier, [[value]]: ECMAScript value }. This List represents the values of the private fields for the object. All objects, including Proxies and all host environment-provided objects, have this internal slot, but primitives such as Numbers do not.</p>
+<p>All ECMAScript objects have a new additional internal slot, [[PrivateFieldValues]], which is a List of Records of the form { [[PrivateFieldIdentifer]]: Private Field Identifier, [[PrivateFieldValue]]: ECMAScript value }. This List represents the values of the private fields for the object. All objects, including Proxies and all host environment-provided objects, have this internal slot, but primitives such as Numbers do not.</p>
 
 <emu-clause id="sec-objectcreate" aoid="ObjectCreate">
   <h1>ObjectCreate (_proto_ [ , _internalSlotsList_ ])</h1>
@@ -29,7 +29,7 @@
     1. Assert: _P_ is a Private Field Identifier value.
     1. Assert: _O_ is an object with a [[PrivateFieldValues]] internal slot.
     1. For each element _entry_ in _O_.[[PrivateFieldValues]],
-      1. If _entry_.[[field]] is _P_, return _entry_.
+      1. If _entry_.[[PrivateFieldIdentifier]] is _P_, return _entry_.
     1. Return ~empty~.
   </emu-alg>
 </emu-clause>
@@ -41,7 +41,7 @@
     1. If _O_ is not an object, throw a *TypeError* exception.
     1. Let _entry_ be PrivateFieldFind(_P_, _O_).
     1. If _entry_ is not ~empty~, throw a *TypeError* exception.
-    1. Append { [[field]]: P, [[value]]: _value_ } to _O_.[[PrivateFieldValues]].
+    1. Append { [[PrivateFieldIdentifier]]: P, [[PrivateFieldValue]]: _value_ } to _O_.[[PrivateFieldValues]].
   </emu-alg>
 </emu-clause>
 
@@ -52,7 +52,7 @@
     1. If _O_ is not an object, throw a *TypeError* exception.
     1. Let _entry_ be PrivateFieldFind(_P_, _O_).
     1. If _entry_ is ~empty~, throw a *TypeError* exception.
-    1. Return _entry_.[[value]].
+    1. Return _entry_.[[PrivateFieldValue]].
   </emu-alg>
 </emu-clause>
 
@@ -63,6 +63,6 @@
     1. If _O_ is not an object, throw a *TypeError* exception.
     1. Let _entry_ be PrivateFieldFind(_P_, _O_).
     1. If _entry_ is ~empty~, throw a *TypeError* exception.
-    1. Set _entry_.[[value]] to _value_.
+    1. Set _entry_.[[PrivateFieldValue]] to _value_.
   </emu-alg>
 </emu-clause>
