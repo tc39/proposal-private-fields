@@ -193,5 +193,49 @@
       1. Return a value of type Reference whose base value is _baseValue_, whose referenced name is _fieldName_, whose strict reference flag is *true*, and whose private reference component is *true*.
     </emu-alg>
   </emu-clause>
+</emu-clause>
 
+<emu-clause id="sec-only-defined-private-names">
+  <h1>Early errors for referring to undefined private names</h1>
+  <emu-clause id="sec-all-private-names-valid" aoid="AllPrivateNamesValid">
+    <h1>Static Semantics: AllPrivateNamesValid</h1>
+    AllPrivateNamesValid is an abstract operation which takes _names_ as an argument.
+    <emu-grammar>MemberExpression[Yield] : MemberExpression[?Yield] `.` PrivateName</emu-grammar>
+    <emu-grammar> PrimaryExpression[Yield] : PrivateName</emu-grammar>
+    <emu-alg>
+      1. If StringValue(|PrivateName|) is in _names_, return *true*.
+      1. Return *false*.
+    </emu-alg>
+
+    <emu-grammar> ClassBody[Yield, Await] : ClassElementList[?Yield, ?Await] </emu-grammar>
+    <emu-alg>
+      1. Let _newNames_ be the concatenation of _names_ with BoundNames of |ClassBody|.
+      1. Return AllPrivateNamesValid of |ClassElementList| with the argument _newNames_.
+    </emu-alg>
+
+    For all other grammatical productions, recurse on subexpressions/substatements, passing in the _names_ of the caller. If all pieces return *true*, then return *true*. If any returns *false*, return *false.
+  </emu-clause>
+
+  <emu-clause id="sec-check-private-names">
+    <h1>Static Semantics: Early Errors</h1>
+    <emu-grammar>Script : ScriptBody?</emu-grammar>
+    <emu-alg>
+      1. Let _names_ be an empty List.
+      1. If |Script| is parsed directly from PerformEval,
+        1. Let _env_ be the running execution context's LexicalEnvironment.
+        1. While _env_ is not *null*,
+          1. If _env_ is a Declarative Environment Record,
+            1. For each binding with the name _N_,
+              1. If _N_ starts with `"#"` and _names does not contain _N_, append _N_ to _names_.
+          1. Let _env_ be _env_'s outer environment reference.
+      1. If AllPrivateNamesValid of |ScriptBody| with the argument _names_ is *false*, throw a SyntaxError.
+    </emu-alg>
+    <emu-grammar>Module : ModuleBody?</emu-grammar>
+    <ul>
+      <li>It is a Syntax Error if AllPrivateNamesValid of |ModuleBody| with ane empty List as an argument is *false*.</li>
+    </ul>
+    <emu-grammar>Module : ModuleBody?</emu-grammar>
+    <ul>
+      <li>It is a syntax error if AllPrivateNamesValid of |ModuleBody| with ane empty List as an argument is *false*.</li>
+    </ul>
 </emu-clause>
