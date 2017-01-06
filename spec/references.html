@@ -130,7 +130,8 @@
           1. Assert: In this case, _base_ will never be *null* or *undefined*.
           1. Let _base_ be ToObject(_base_).
         1. <ins>If IsPrivateReference(_V_), then</ins>
-          1. <ins>Let _field_ be ? ResolveBinding(GetReferencedName(_V_)).</ins>
+          1. <ins>Let _env_ be the running execution context's PrivateFieldEnvironment.</ins>
+          1. <ins>Let _field_ be ? ResolveBinding(GetReferencedName(_V_), _env_).</ins>
           1. <ins>Assert: _field_ is a Private Field Identifier.</ins>
           1. <ins>Return ? PrivateFieldGet(_field_, _base_).</ins>
         1. Return ? _base_.[[Get]](GetReferencedName(_V_), GetThisValue(_V_)).
@@ -160,7 +161,8 @@
           1. Assert: In this case, _base_ will never be *null* or *undefined*.
           1. Set _base_ to ToObject(_base_).
         1. <ins>If IsPrivateReference(_V_), then</ins>
-          1. <ins>Let _field_ be ? ResolveBinding(GetReferencedName(_V_)).</ins>
+          1. <ins>Let _env_ be the running execution context's PrivateFieldEnvironment.</ins>
+          1. <ins>Let _field_ be ? ResolveBinding(GetReferencedName(_V_), _env_).</ins>
           1. <ins>Assert: _field_ is a Private Field Identifier.</ins>
           1. <ins>Perform ? PrivateFieldSet(_field_, _base_, _W_).</ins>
         1. Else,
@@ -195,6 +197,52 @@
   </emu-clause>
 </emu-clause>
 
+<emu-clause id="sec-execution-contexts">
+  <h1>Execution Contexts</h1>
+    <emu-table id="table-23" caption="Additional State Components for ECMAScript Code Execution Contexts">
+      <table>
+        <tbody>
+        <tr>
+          <th>
+            Component
+          </th>
+          <th>
+            Purpose
+          </th>
+        </tr>
+        <tr>
+          <td>
+            LexicalEnvironment
+          </td>
+          <td>
+            Identifies the Lexical Environment used to resolve identifier references made by code within this execution context.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            VariableEnvironment
+          </td>
+          <td>
+            Identifies the Lexical Environment whose EnvironmentRecord holds bindings created by |VariableStatement|s within this execution context.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <ins>PrivateFieldEnvironment</ins>
+          </td>
+          <td>
+            <ins>Identifies the Lexical Environment whose EnvironmentRecord holds internal private field identifiers created by |PrivateFieldDefinition|s.</ins>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </emu-table>
+  <emu-note>The PrivateFieldEnvironment Lexical Context is always a chain of Declaration Contexts. Each name begins with `"#"`.</emu-note>
+
+  When a new execution context is created for an ECMAScript code execution context, the PrivateFieldIdentifiers value is inherited from the running execution context, or if none exists, a new Declaration Context with a *null* parent.
+  <!-- TODO: Elaborate the preceding paragraph with spec text inserted in each relevant place -->
+</emu-clause>
+
 <emu-clause id="sec-only-defined-private-names">
   <h1>Early errors for referring to undefined private names</h1>
   <emu-clause id="sec-all-private-names-valid" aoid="AllPrivateNamesValid">
@@ -214,6 +262,7 @@
     </emu-alg>
 
     For all other grammatical productions, recurse on subexpressions/substatements, passing in the _names_ of the caller. If all pieces return *true*, then return *true*. If any returns *false*, return *false.
+  <!-- TODO: Elaborate the preceding paragraph with spec text inserted in each relevant place -->
   </emu-clause>
 
   <emu-clause id="sec-check-private-names">
@@ -222,11 +271,10 @@
     <emu-alg>
       1. Let _names_ be an empty List.
       1. If |Script| is parsed directly from PerformEval,
-        1. Let _env_ be the running execution context's LexicalEnvironment.
+        1. Let _env_ be the running execution context's PrivateFieldEnvironment.
         1. While _env_ is not *null*,
-          1. If _env_ is a Declarative Environment Record,
-            1. For each binding with the name _N_,
-              1. If _N_ starts with `"#"` and _names does not contain _N_, append _N_ to _names_.
+          1. For each binding with the name _N_,
+            1. If _names_ does not contain _N_, append _N_ to _names_.
           1. Let _env_ be _env_'s outer environment reference.
       1. If AllPrivateNamesValid of |ScriptBody| with the argument _names_ is *false*, throw a SyntaxError.
     </emu-alg>

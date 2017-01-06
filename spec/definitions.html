@@ -25,8 +25,8 @@
   </emu-alg>
 </emu-clause>
 
-<emu-clause id="sec-private-names-bound-names">
-  <h1>Static Semantics: BoundNames</h1>
+<emu-clause id="sec-private-bound-names">
+  <h1>Static Semantics: PrivateBoundNames</h1>
 
   <emu-grammar>
     PrivateFieldDefinition : PrivateName Initializer? `;`
@@ -50,22 +50,22 @@
     ClassElement : PrivateFieldDefinition
   </emu-grammar>
   <emu-alg>
-    1. Return BoundNames of |PrivateFieldDefinition|.
+    1. Return PrivateBoundNames of |PrivateFieldDefinition|.
   </emu-alg>
 
   <emu-grammar>
     ClassElementList : ClassElement
   </emu-grammar>
   <emu-alg>
-    1. Return BoundNames of |ClassElement|.
+    1. Return PrivateBoundNames of |ClassElement|.
   </emu-alg>
 
   <emu-grammar>
     ClassElementList : ClassElementList ClassElement
   </emu-grammar>
   <emu-alg>
-    1. Let _names_ be BoundNames of |ClassElementList|.
-    1. Append to _names_ the elements of BoundNames of |ClassElement|.
+    1. Let _names_ be PrivateBoundNames of |ClassElementList|.
+    1. Append to _names_ the elements of PrivateBoundNames of |ClassElement|.
     1. Return _names_.
   </emu-alg>
 
@@ -73,7 +73,7 @@
     ClassBody : ClassElementList
   </emu-grammar>
   <emu-alg>
-    1. Return BoundNames of |ClassElementList|.
+    1. Return PrivateBoundNames of |ClassElementList|.
   </emu-alg>
 </emu-clause>
 
@@ -126,7 +126,7 @@
   <emu-alg>
     1. Let _bindingName_ be StringValue of |PrivateName|.
     1. Let _field_ be NewPrivateField();
-    1. Let _scope_ be the running execution context's LexicalEnvironment.
+    1. Let _scope_ be the running execution context's PrivateFieldEnvironment.
     1. Let _scopeEnvRec_ be _scope_'s EnvironmentRecord.
     1. Perform ! _scopeEnvRec_.InitializeBinding(_bindingName_, _field_).
     1. NOTE: Since _bindingName_ is not a valid |Identifier|, _field_ is not visible to user code.
@@ -180,15 +180,20 @@ Types:
     1. Let _classScopeEnvRec_ be _classScope_'s EnvironmentRecord.
     1. If _className_ is not *undefined*, then
       1. Perform _classScopeEnvRec_.CreateImmutableBinding(_className_, *true*).
+    1. <ins>Let _outerPrivateEnvironment_ be the PrivateFieldEnvironment of the running execution context.</ins>
+    1. <ins>Let _classPrivateEnvironment_ be NewDeclarativeEnvironment(_outerPrivateEnvironment_).</ins>
+    1. <ins>Let _classPrivateEnvRec_ be _classPrivateEnvironment_'s EnvironmentRecord.</ins>
     1. <ins>If |ClassBody_opt| is present, then</ins>
-      1. <ins>For each element _dn_ of the BoundNames of |ClassBody_opt|,</ins>
-        1. <ins>Perform _classScopeEnvRec_.CreateImmutableBinding(_dn_, *true*).</ins>
+      1. <ins>For each element _dn_ of the PrivateBoundNames of |ClassBody_opt|,</ins>
+        1. <ins>Perform _classPrivateEnvRec_.CreateImmutableBinding(_dn_, *true*).</ins>
     1. If |ClassHeritage_opt| is not present, then
       1. Let _protoParent_ be the intrinsic object %ObjectPrototype%.
       1. Let _constructorParent_ be the intrinsic object %FunctionPrototype%.
     1. Else,
       1. Set the running execution context's LexicalEnvironment to _classScope_.
+      1. <ins>Set the running execution context's PrivateFieldEnvironment to _classPrivateEnvironment_.</ins>
       1. Let _superclass_ be the result of evaluating |ClassHeritage|.
+      1. <ins>Set the running execution context's PrivateFieldEnvironment to _outerPrivateEnvironment_.</ins>
       1. Set the running execution context's LexicalEnvironment to _lex_.
       1. ReturnIfAbrupt(_superclass_).
       1. If _superclass_ is *null*, then
@@ -212,6 +217,7 @@ Types:
           <pre><code class="javascript">constructor( ){ }</code></pre>
           using the syntactic grammar with the goal symbol |MethodDefinition|.
     1. Set the running execution context's LexicalEnvironment to _classScope_.
+    1. <ins>Set the running execution context's PrivateFieldEnvironment to _classPrivateEnvironment_.</ins>
     1. Let _constructorInfo_ be the result of performing DefineMethod for _constructor_ with arguments _proto_ and _constructorParent_ as the optional _functionPrototype_ argument.
     1. Assert: _constructorInfo_ is not an abrupt completion.
     1. Let _F_ be _constructorInfo_.[[closure]].
@@ -227,6 +233,7 @@ Types:
       1. Else,
         1. Let _status_ be the result of performing PropertyDefinitionEvaluation for _m_ with arguments _F_ and *false*.
       1. If _status_ is an abrupt completion, then
+        1. <ins>Set the running execution context's PrivateFieldEnvironment to _outerPrivateEnvironment_.</ins>
         1. Set the running execution context's LexicalEnvironment to _lex_.
         1. Return Completion(_status_).
     1. <ins>If |ClassBody_opt| is not present, let _fieldDefinitions_ be a new empty List.</ins>
@@ -237,6 +244,7 @@ Types:
       1. <ins>Append _fieldRecord_ to _privateFields_.</ins>
     <!-- Is this too late to add a private slot to the class? It could instead be added as an empty list on every function in FunctionAllocate. -->
     1. Set the value of _F_'s [[PrivateFieldDefinitions]] internal slot to _privateFields_.</ins>
+    1. <ins>Set the running execution context's PrivateFieldEnvironment to _outerPrivateEnvironment_.</ins>
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. If _className_ is not *undefined*, then
       1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
