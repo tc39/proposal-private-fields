@@ -2,6 +2,19 @@
 
 <p>All ECMAScript objects have a new additional internal slot, [[PrivateFieldValues]], which is a List of Records of the form { [[PrivateFieldIdentifer]]: Private Field Identifier, [[PrivateFieldValue]]: ECMAScript value }. This List represents the values of the private fields for the object. All objects, including Proxies and all host environment-provided objects, have this internal slot, but primitives such as Numbers do not.</p>
 
+<emu-motivation>
+<p>
+  Private fields are designed to have semantics analogous to WeakMaps. However, the implied garbage collection semantics are weaker: If all the references to a WeakMap are inaccessible, but there is still a reference to a key which was in the WeakMap, one would expect the value to be eventually collected. However, PrivateFieldIdentifiers specifically do not have this connotation: because the reference from the Identifier to the Value is in a Record which the Object points to, the value would not be collected, even if nothing else points to the identifier.
+</p>
+<p>
+  Private Field Identifiers are a specification type here, not directly observable to ECMAScript code. However, in <a href="">a decorator integration strawman</a>, an object wrapping Private Field Identifiers would be exposed to allow greater metaprogramming.
+</p>
+</emu-motivation>
+
+<emu-issue>
+  Private fields are deliberately inaccessible outside of the class body. It is proposed that there could be an "escape hatch" to access them though some sort of reflective mechanism; see <a href="">the GitHub thread</a>. This proposa deliberately omits any such escape hatch.
+</emu-issue>
+
 <emu-clause id="sec-objectcreate" aoid="ObjectCreate">
   <h1>ObjectCreate (_proto_ [ , _internalSlotsList_ ])</h1>
   <p>The abstract operation ObjectCreate with argument _proto_ (an object or null) is used to specify the runtime creation of new ordinary objects. The optional argument _internalSlotsList_ is a List of the names of additional internal slots that must be defined as part of the object. If the list is not provided, a new empty List is used. This abstract operation performs the following steps:</p>
@@ -14,6 +27,7 @@
     1. <ins>Set _obj_.[[PrivateFieldValues]] to an empty List.</ins>
     1. Return _obj_.
   </emu-alg>
+  <emu-todo>All ECMAScript objects, including Proxies, and any user exotic object, should have a [[PrivateFieldValues]] internal slot iniitlaized to an empty List.</emu-todo>
 </emu-clause>
 
 <emu-clause id="sec-newprivatefield" aoid="NewPrivateField">

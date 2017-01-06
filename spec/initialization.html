@@ -14,6 +14,8 @@
     1. Set the running execution context's LexicalEnvironment to _lex_.
     1. Return.
   </emu-alg>
+  <emu-motivation>Private fields are added to the object one by one, interspersed with evaluation of the initializers, following the construction of the receiver. These semantics allow for a later initializer to refer to a previously private field.</emu-motivation>
+  <emu-todo>When integrating this specification with <a href="">public fields</a>, ensure that the field additions are interspersed in definition order in how they are added to the reciever.</emu-todo>
 </emu-clause>
 
 <emu-clause id="sec-ecmascript-function-objects-construct-argumentslist-newtarget">
@@ -45,6 +47,7 @@
     1. Else, ReturnIfAbrupt(_result_).
     1. Return ? _envRec_.GetThisBinding().
   </emu-alg>
+  <emu-motivation>Private fields are added by the base class constructor when the super chain reaches up to that, rather than by the subclass constructor when creating the object, in order to be analogous to ES2015 subclassable builtins. See <a href="">this GitHub thread</a> for more discussion.</emu-motivation>
 </emu-clause>
 
 <emu-clause id="sec-super-keyword">
@@ -72,7 +75,7 @@
       1. <ins>Perform ? InitializePrivateFields(_thisValue_, _F_).</ins>
       1. Return _thisValue_.
     </emu-alg>
-
+  <emu-motivation>Private fields are added to whatever value is returned by the super constructor. These semantics allow private fields to be used in exotic situations like <a href="">custom elements upgrade</a>.</emu-motivation>
   </emu-clause>
 
 </emu-clause>

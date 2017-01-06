@@ -7,6 +7,10 @@
     PrivateName
 </emu-grammar>
 
+<emu-motivation>
+  This proposal allows both abbreviated references to private state (`#x`) which have an implicit `this` as the receiver, as well as explicit receivers (`obj.#x`). The implicit receiver form is intended for better ergonomics for the common case, and the explicit receiver form allows the full generality of "class-private" (as opposed to "instance-private").
+</emu-motivation>
+
 <emu-clause id="sec-private-references-runtime-semantics-evaluation">
   <h1>Runtime Semantics: Evaluation</h1>
   <emu-grammar>MemberExpression : MemberExpression `.` PrivateName</emu-grammar>
@@ -52,6 +56,7 @@
     <emu-note>
       <p>The last rule means that expressions such as `delete (((foo)))` produce early errors because of recursive application of the first rule.</p>
     </emu-note>
+    <emu-motivation>Private fields may not be deleted</emu-motivation>
   </emu-clause>
 
   <emu-clause id="sec-delete-operator-runtime-semantics-evaluation">
@@ -239,8 +244,10 @@
     </emu-table>
   <emu-note>The PrivateFieldEnvironment Lexical Context is always a chain of Declaration Contexts. Each name begins with `"#"`.</emu-note>
 
+  <emu-motivation>Private fields identifiers could be specified by lumping it all into the LexicalEnvironment. However, this would create false conflicts with object environment records that would need to be resolved. Further, it seems logically cleaner to separate out the distinct namespace into a distinct object.</emu-motivation>
+
   When a new execution context is created for an ECMAScript code execution context, the PrivateFieldIdentifiers value is inherited from the running execution context, or if none exists, a new Declaration Context with a *null* parent.
-  <!-- TODO: Elaborate the preceding paragraph with spec text inserted in each relevant place -->
+  <emu-todo>Elaborate the preceding paragraph with spec text inserted in each relevant place</emu-todo>
 </emu-clause>
 
 <emu-clause id="sec-only-defined-private-names">
@@ -257,12 +264,12 @@
 
     <emu-grammar> ClassBody[Yield, Await] : ClassElementList[?Yield, ?Await] </emu-grammar>
     <emu-alg>
-      1. Let _newNames_ be the concatenation of _names_ with BoundNames of |ClassBody|.
+      1. Let _newNames_ be the concatenation of _names_ with PrivateBoundNames of |ClassBody|.
       1. Return AllPrivateNamesValid of |ClassElementList| with the argument _newNames_.
     </emu-alg>
 
     For all other grammatical productions, recurse on subexpressions/substatements, passing in the _names_ of the caller. If all pieces return *true*, then return *true*. If any returns *false*, return *false.
-  <!-- TODO: Elaborate the preceding paragraph with spec text inserted in each relevant place -->
+  <emu-todo>Elaborate the preceding paragraph with spec text inserted in each relevant place</emu-todo>
   </emu-clause>
 
   <emu-clause id="sec-check-private-names">
@@ -282,4 +289,6 @@
     <ul>
       <li>It is a Syntax Error if AllPrivateNamesValid of <emu-nt>ModuleBody</emu-nt> with ane empty List as an argument is *false*.</li>
     </ul>
+  </emu-clause>
+  <emu-motivation>References to PrivateNames which are not lexically present cause an early error. PrivateNames with or without an explicit receiver are treated identically, see <a href="">bug thread</a> where a stricter policy was proposed and rejected.</emu-motivation>
 </emu-clause>

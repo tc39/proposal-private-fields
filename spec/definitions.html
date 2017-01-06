@@ -13,6 +13,10 @@
     PrivateName Initializer[In, ?Yield]? `;`
 </emu-grammar>
 
+<emu-issue>
+  It is proposed that private field declarations may begin with an additional `private` or `pri` keyword; see <a href="">the GitHub thread</a>. Another proposed addition is an abbreviated comma syntax, of the form `pri x, y`.
+</emu-issue>
+
 <emu-clause id="sec-private-names-static-semantics-stringvalue">
   <h1>Static Semantics: PrivateStringValue</h1>
   <emu-see-also-para op="PrivateStringValue"></emu-see-also-para>
@@ -137,6 +141,7 @@
     1. Else, let _initializer_ be ~empty~.
     1. Return Record{[[PrivateFieldDefinitionIdentifier]]: _field_, [[PrivateFieldDefinitionInitializer]]: _initializer_}.
   </emu-alg>
+  <emu-motivation>The scope that the initializer is evaluated in is equivalent to a method which is called with no arguments.</emu-motivation>
 </emu-clause>
 
 <emu-clause id="runtime-semantics-class-public-field-definition-evaluation">
@@ -250,4 +255,5 @@ Types:
       1. Perform _classScopeEnvRec_.InitializeBinding(_className_, _F_).
     1. Return _F_.
   </emu-alg>
+  <emu-motivation>Each time a class declaration executes, distinct internal Private Field Identifiers are created. This means, that they cannot directly access each other's private state if a method of one is called with the other as a receiver.</emu-motivation>
 </emu-clause>
