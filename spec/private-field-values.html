@@ -7,12 +7,12 @@
   Private fields are designed to have semantics analogous to WeakMaps. However, the implied garbage collection semantics are weaker: If all the references to a WeakMap are inaccessible, but there is still a reference to a key which was in the WeakMap, one would expect the value to be eventually collected. However, PrivateFieldIdentifiers specifically do not have this connotation: because the reference from the Identifier to the Value is in a Record which the Object points to, the value would not be collected, even if nothing else points to the identifier.
 </p>
 <p>
-  Private Field Identifiers are a specification type here, not directly observable to ECMAScript code. However, in <a href="">a decorator integration strawman</a>, an object wrapping Private Field Identifiers would be exposed to allow greater metaprogramming.
+  Private Field Identifiers are a specification type here, not directly observable to ECMAScript code. However, in <a href="https://github.com/tc39/proposal-private-fields/blob/master/DECORATORS.md">a decorator integration strawman</a>, an object wrapping Private Field Identifiers would be exposed to allow greater metaprogramming.
 </p>
 </emu-motivation>
 
 <emu-issue>
-  Private fields are deliberately inaccessible outside of the class body. It is proposed that there could be an "escape hatch" to access them though some sort of reflective mechanism; see <a href="">the GitHub thread</a>. This proposa deliberately omits any such escape hatch.
+  Private fields are deliberately inaccessible outside of the class body. It is proposed that there could be an "escape hatch" to access them though some sort of reflective mechanism; see <a href="https://github.com/tc39/proposal-private-fields/issues/33">the GitHub thread</a>. This proposa deliberately omits any such escape hatch.
 </emu-issue>
 
 <emu-clause id="sec-objectcreate" aoid="ObjectCreate">
