@@ -29,7 +29,17 @@
   </emu-alg>
 </emu-clause>
 
-<emu-clause id="sec-private-bound-names">
+<emu-clause id="sec-duplicate-early-error">
+  <h1>Static Semantics: Early Errors</h1>
+  <emu-grammar>
+    ClassBody : ClassElementList
+  </emu-grammar>
+  <ul>
+    <li>It is a Syntax Error if PrivateBoundNames of |ClassBody| contains any duplicate entries.</li>
+  </ul>
+</emu-clause>
+
+<emu-clause id="sec-private-bound-names" aoid="PrivateBoundNames">
   <h1>Static Semantics: PrivateBoundNames</h1>
 
   <emu-grammar>
