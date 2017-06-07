@@ -61,8 +61,7 @@ The lexical grammar is extended with an additional token:
 
 ```
 PrivateName ::
-    `#` IdentifierPart
-    PrivateName IdentifierPart
+    `#` IdentifierName
 ```
 
 Private field definitions are allowed within class bodies:
