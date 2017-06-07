@@ -2,7 +2,7 @@
 
 ### A Brief Introduction
 
-Private field names are represented as an identifier prefixed with the `#` character.  Private field definitions create immutable bindings which are lexically confined to their containing class body and are not reified.  In the following example, `#x` and `#y` identify private fields whose type is guaranteed to be **Number**.
+Private field names are represented as an identifier prefixed with the `#` character.  Private field definitions create immutable bindings which are lexically confined to their containing class body and are not reified.  In the following example, `#x` and `#y` identify private fields whose type is guaranteed to be **Number** (but it will throw a TypeError if you pass Symbol as an argument).
 
 ```js
 class Point {
