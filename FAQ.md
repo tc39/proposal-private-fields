@@ -74,7 +74,21 @@ On the other hand, it might be surprising that they differ, and this is a downsi
 
 ## Why not have access be `this#x`, without the dot?
 
-It's an [ASI hazard](https://github.com/tc39/proposal-private-fields/issues/39#issuecomment-237121552), given the shorthand syntax of `#x` to mean `this.#x`.
+It's an ASI hazard [for the shorthand syntax of `#x`](https://github.com/tc39/proposal-private-fields/issues/39#issuecomment-237121552) and for declarations:
+
+```js
+class Person {
+  properties = {}
+  #id
+}
+```
+would actually parse as 
+
+```js
+class Person {
+  properties = {}#id
+}
+```
 
 ## Why does this proposal allow accessing private fields of other instances of the same class? Don't other languages normally forbid that?
 
