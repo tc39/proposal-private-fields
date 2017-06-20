@@ -89,6 +89,25 @@ class Point {
 	public boolean equals(Point p) { return this.x == p.x && this.y == p.y; }
 }
 ```
+## Why was the sigil `#` chosen, among all the Unicode code points?
+
+No one came out and said, `#` is the most beautiful, intuitive thing to indicate private state. Instead, it was more of a process of elimination:
+- `@` was the initial favorite, but it was taken by decorators. TC39 considered swapping decorators and private state sigils, but the committee decided to defer to the existing usage of transpiler users.
+- `_` would cause compatibility issues with existing JavaScript code, which has allowed `_` at the start of an identifier or (public) property name for a long time.
+- Other characters which could be used as infix operators, but not prefix operators, are hypothetically possible, such as `%`, `^`, `&`, `?`, given that our syntax is a bit unique--`x.%y` is not valid currently, so there would be no ambiguity. However, the shorthand would lead to ASI issues, e.g., the following would look like using the infix operator:
+```js
+class Foo {
+  %x;
+  method() {
+    calculate().my().value()
+    %x.print()
+  }
+}
+```
+Here, the user likely intended to call the `print` method on `this.%x`, but instead, the mod operator will be used!
+- Other Uniocde code points which are not in ASCII or IDStart could be used, but these might be hard to input for many users; they are not found on common keyboards.
+
+In the end, the only other options are longer sequences of punctuation, which seems suboptimal compared to a single character.
 
 ## Why doesn't this proposal allow some mechanism for reflecting on / accessing private fields from outside the class which declares them (e.g. for testing)? Don't other languages normally allow that?
 
