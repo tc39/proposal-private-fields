@@ -26,7 +26,7 @@ class Derived extends Base {
 }
 ```
 
-### Why not do a runtime check on the type of the reciever to determine whether to access the private or public field named `x`?
+### Why not do a runtime check on the type of the receiver to determine whether to access the private or public field named `x`?
 
 Property access semantics are already complicated, and we don't want to slow down every property access just to add this feature.
 
@@ -36,7 +36,7 @@ It also would allow methods of the class to be tricked into operating on public 
 
 Class methods often manipulate objects which are not instances of the class. It would be surprising if the code `obj.x` suddenly stopped referring to public field `x` of `obj`, when `obj` is not expected to be an instance of the class, just because that code happened to occur somewhere within a class which declares a private field named `x`, possibly deep within said class.
 
-This is only an issue in JavaScript because of its lack of static types. Statically typed languages use type declarations to distinguish the external-public/internal-private cases with out the need of a sigil. But a dynamically typed language doesn't have enough static information to differentiate those cases.
+This is only an issue in JavaScript because of its lack of static types. Statically typed languages use type declarations to distinguish the external-public/internal-private cases without the need of a sigil. But a dynamically typed language doesn't have enough static information to differentiate those cases.
 
 ### Why not give the `this` keyword special semantics?
 
@@ -80,7 +80,7 @@ It's an [ASI hazard](https://github.com/tc39/proposal-private-fields/issues/39#i
 
 ## Why does this proposal allow accessing private fields of other instances of the same class? Don't other languages normally forbid that?
 
-It's very useful: see e.g. the `equals` method in the `Point` example in the readme. And in fact [other languages](https://github.com/tc39/proposal-private-fields/issues/90#issuecomment-307201358) allow it for the same reason; e.g. the following is perfectly legal Java:
+It's very useful: see e.g. the `equals` method in the `Point` example in the readme. And in fact, [other languages](https://github.com/tc39/proposal-private-fields/issues/90#issuecomment-307201358) allow it for the same reason; e.g. the following is perfectly legal Java:
 
 ```java
 class Point {
@@ -105,7 +105,7 @@ class Foo {
 }
 ```
 Here, the user likely intended to call the `print` method on `this.%x`, but instead, the mod operator will be used!
-- Other Uniocde code points which are not in ASCII or IDStart could be used, but these might be hard to input for many users; they are not found on common keyboards.
+- Other Unicode code points which are not in ASCII or IDStart could be used, but these might be hard to input for many users; they are not found on common keyboards.
 
 In the end, the only other options are longer sequences of punctuation, which seems suboptimal compared to a single character.
 
