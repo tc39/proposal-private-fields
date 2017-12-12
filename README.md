@@ -2,6 +2,8 @@
 
 This proposal has been merged into the [class fields](https://github.com/tc39/proposal-class-fields) proposal. Please see that repository for current status. The rest of this repository is left up as a historical archive.
 
+Note, this historical version of the specification includes the "private field shorthand" feature, where `#x` is shorthand for `this.#x`. That feature has been removed from the [current class fields proposal](https://github.com/tc39/proposal-class-fields), set to be proposed as a possible follow-on. To minimize confusion, shorthand has been removed from this explainer, though it is still present in supporting documents and the specification text.
+
 ## ECMAScript Private Fields
 
 ### A Brief Introduction
@@ -15,19 +17,19 @@ class Point {
     #y;
 
     constructor(x = 0, y = 0) {
-        #x = +x;
-        #y = +y;
+        this.#x = +x;
+        this.#y = +y;
     }
 
-    get x() { return #x }
-    set x(value) { #x = +value }
+    get x() { return this.#x }
+    set x(value) { this.#x = +value }
 
-    get y() { return #y }
-    set y(value) { #y = +value }
+    get y() { return this.#y }
+    set y(value) { this.#y = +value }
 
-    equals(p) { return #x === p.#x && #y === p.#y }
+    equals(p) { return this.#x === p.#x && this.#y === p.#y }
 
-    toString() { return `Point<${ #x },${ #y }>` }
+    toString() { return `Point<${ this.#x },${ this.#y }>` }
 
 }
 ```
@@ -40,8 +42,8 @@ class Point {
     #y = 0;
 
     constructor() {
-        #x; // 0
-        #y; // 0
+        this.#x; // 0
+        this.#y; // 0
     }
 }
 ```
