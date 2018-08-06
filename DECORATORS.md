@@ -120,7 +120,7 @@ function hidden(descriptor) {
     isStatic: true,
     key: 'getHidden' + descriptor.name[1].toUpperCase() + descriptor.name.slice(2),
     value(receiver) {
-      return descritor.key.get(receiver);
+      return descriptor.key.get(receiver);
     }
   };
   return [descriptor, getterDescriptor];
@@ -155,10 +155,10 @@ function indexable(descriptor) {
     type: 'accessor',
     key: descriptor.name,
     get(receiver) {
-      return descritor.key.get(receiver);
+      return descriptor.key.get(receiver);
     },
     set(receiver, value) {
-      return descritor.key.set(receiver, value);
+      return descriptor.key.set(receiver, value);
     }
   };
   return [descriptor, getterSetterDescriptor];
